@@ -1,6 +1,6 @@
 import { Box } from "@mui/system"
 import { AlertContainer } from "./alert"
-import DrawerNav from "./drawer"
+import DrawerNavigation from "./drawer"
 import { LoadingContainer } from "./loading"
 
 export const PageContainer = (props: { children: JSX.Element, hasNav?: boolean }) => {
@@ -18,7 +18,7 @@ export const PageContainer = (props: { children: JSX.Element, hasNav?: boolean }
                     overflow: 'auto',
                 }}
             >
-                {hasNav && <DrawerNav />}
+                {hasNav && <DrawerNavigation />}
                 {children}
             </Box>
         </>)

@@ -24,7 +24,7 @@ const routeData = [
         text: '產品列表',
         routeTo: '/product',
     }]
-export default function DrawerNav() {
+export default function DrawerNavigation() {
     const navigate = useNavigate()
     const [isShow, setIsShow] = useState(false);
     const toggleDrawer =

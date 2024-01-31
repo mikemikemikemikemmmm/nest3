@@ -7,7 +7,6 @@ export const COLOR_IMG_HEIGHT = COLOR_IMG_WIDTH
 export const SUB_PRODUCT_IMG_WIDTH = 500
 export const SUB_PRODUCT_IMG_HEIGHT = SUB_PRODUCT_IMG_WIDTH
 export const PRODUCT_MODAL_CONTAINER_ID = 'productModalContainerId'
-// export const NEW_ID_START = -9999
 export const CREAT_PRODUCT_PREFIX = 'create'
 export const FORMDATA_KEY_FOR_FILE = 'file'
 export const FORMDATA_KEY_FOR_DTO = 'stringifyJson'

@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 
 import '../src/style/index.css'
 import { Category } from "./page/category";
-import { Color } from "./page/color";
+import { Color, ColorPage } from "./page/color";
 import { ProductPage } from "./page/product";
 import { DetailPage } from "./page/detail";
 import { LoginPage } from "./page/login";
@@ -13,28 +13,31 @@ import { PageContainer } from "./component/pageContainer";
 export const router = createHashRouter([
   {
     path: "/",
-    element: <PageContainer hasNav={false}><LoginPage /></PageContainer>,
+    element: <LoginPage />,
   },
   {
     path: "/category",
-    element: <PageContainer><Category /></PageContainer>,
+    element: <Category />,
   },
   {
     path: "/color",
-    element: <PageContainer><Color /></PageContainer>,
+    element: <ColorPage />,
   },
   {
     path: "/product",
-    element: <PageContainer><ProductPage /></PageContainer>,
+    element: <ProductPage />,
   },
   {
     path: "/detail/:productId",
-    element: <PageContainer><DetailPage /></PageContainer>,
+    element: <DetailPage />,
   },
 ]);
 export default function App() {
   console.log('app render')
   return (
-    <RouterProvider router={router} />
+    <PageContainer>
+      <RouterProvider router={router} />
+    </PageContainer>
+
   );
 }

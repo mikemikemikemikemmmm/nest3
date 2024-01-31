@@ -187,7 +187,7 @@ const ColorCard = (props: {
     )
 }
 const getEmptyModalData = () => ({ name: "" })
-export const Color = () => {
+export const ColorPage = () => {
     const [colors, setColors] = useState<ResColor[]>([])
     const [toggleToRender, setToggleToRender] = useState(false)
     const [productCard, setProductCard] = useState<ResProductCard[]>([])
