@@ -1,55 +1,47 @@
-import { useDispatch } from "react-redux"
-import { CreateDto, UpdateDto } from "../../api/entityType"
 import { useState } from "react"
-import { COLOR_IMG_HEIGHT, COLOR_IMG_WIDTH, FAKE_ID_FOR_CREATE, FORMDATA_KEY_FOR_FILE } from "../../const"
+import { CreateDto, UpdateDto } from "../../api/entityType"
+import { FAKE_ID_FOR_CREATE, SUB_PRODUCT_IMG_HEIGHT, SUB_PRODUCT_IMG_WIDTH, SUB_PRODUCT_MODAL_IMG_DOM_ID } from "../../const"
 import { dispatchError } from "../../utils/errorHandler"
 import { setIsLoading } from "../../store"
+import { getImgUrlBySubProductIdApi } from "../../api/staticFile"
+import { useDispatch } from "react-redux"
 import { EntityName, createOneApi, updateOneByIdApi } from "../../api/entity"
-import { Box, Button, IconButton, TextField } from "@mui/material"
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { handleImgError } from "../../utils/imgError"
-import { getColorImageUrlApi } from "../../api/staticFile"
-const COLOR_MODAL_IMG_DOM_ID = "COLOR_MODAL_IMG_DOM_ID"
-export interface ColorModalData extends UpdateDto.Color {
+import { Box, Button, IconButton, TextField } from "@mui/material"
+export interface SubProductModalData extends UpdateDto.SubProduct {
     id: number
 }
-export const ColorModal = (props: {
-    modalDataProp: ColorModalData,
+interface Props {
+    modalDataProp: SubProductModalData,
     closeModal: () => void,
-    forcedRender: () => void,
-    setTimestamp?: (timeStamp: number) => void
-}) => {
+}
+export const SubProductModal = (props: Props) => {
     const dispatch = useDispatch()
-    const { modalDataProp, forcedRender, closeModal, setTimestamp } = props
+    const { modalDataProp, closeModal } = props
     const isCreate = modalDataProp.id === FAKE_ID_FOR_CREATE
-    const [modalData, setModalData] = useState<ColorModalData>({ ...modalDataProp })
-    const [nameHasFocused, setNameHasFocused] = useState(false)
+    const [modalData, setModalData] = useState<SubProductModalData>({ ...modalDataProp })
     const [imageBase64Url, setImageBase64Url] = useState<string | null>(null)
+    const handleChangeData = () => {
+
+    }
     const handleSubmit = async () => {
-        setNameHasFocused(true)
         if (modalData.name === '') {
             dispatchError('名稱為必須')
             return
         }
+        let executeApi
         if (isCreate) {
             if (!modalData.imageFile) {
                 dispatchError('圖片為必須')
                 return
             }
-            const execute =
-                await createOneApi<CreateDto.Color>(EntityName.Color, modalData as CreateDto.Color)
-            if (!execute.error) {
-                closeModal()
-                forcedRender()
-            }
-            return
+            executeApi =
+                await createOneApi<CreateDto.SubProduct>(EntityName.SubProduct, modalData as CreateDto.SubProduct)
+        } else {
+            executeApi =
+                await updateOneByIdApi<UpdateDto.SubProduct>(EntityName.SubProduct, modalDataProp.id, modalData)
         }
-        const executeUpdate =
-            await updateOneByIdApi<UpdateDto.Color>(EntityName.Color, modalDataProp.id, modalData)
-        if (!executeUpdate.error) {
-            if (modalData.imageFile && setTimestamp) {
-                setTimestamp(new Date().getTime())
-            }
+        if (!executeApi.error) {
             closeModal()
             forcedRender()
         }
@@ -62,7 +54,7 @@ export const ColorModal = (props: {
             return imageBase64Url
         }
         if (isCreate) {
-            return getColorImageUrlApi(modalDataProp.id, 0)
+            return getImgUrlBySubProductIdApi(modalDataProp.id)
         }
         return ""
     }
@@ -85,10 +77,10 @@ export const ColorModal = (props: {
             tempImageDom.onload = () => {
                 const { width } = tempImageDom
                 const { height } = tempImageDom
-                if (width !== COLOR_IMG_WIDTH ||
-                    height !== COLOR_IMG_HEIGHT) {
+                if (width !== SUB_PRODUCT_IMG_WIDTH ||
+                    height !== SUB_PRODUCT_IMG_HEIGHT) {
                     dispatch(setIsLoading(false))
-                    dispatchError(`長寬有一不為${COLOR_IMG_WIDTH}px`)
+                    dispatchError(`長寬有一不為${SUB_PRODUCT_IMG_WIDTH}px`)
                     return
                 }
                 setModalData({ ...modalData, imageFile: uploadedImageFile })
@@ -111,10 +103,10 @@ export const ColorModal = (props: {
                 onChange={(e) => handleChangeName(e)} />
             <Box sx={{ margin: 1, padding: 1, display: 'flex', justifyContent: 'center' }}>
                 <img
-                    id={COLOR_MODAL_IMG_DOM_ID}
+                    id={SUB_PRODUCT_MODAL_IMG_DOM_ID}
                     style={{
-                        width: imageBase64Url ? COLOR_IMG_WIDTH : 0,
-                        height: imageBase64Url ? COLOR_IMG_HEIGHT : 0
+                        width: imageBase64Url ? SUB_PRODUCT_IMG_WIDTH : 0,
+                        height: imageBase64Url ? SUB_PRODUCT_IMG_HEIGHT : 0
                     }}
                     src={getImagePreviewUrl()}
                     onError={(e) => handleImgError(e)} />

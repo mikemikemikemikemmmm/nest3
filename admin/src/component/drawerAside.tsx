@@ -7,24 +7,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from '@mui/material';
-import { useLocation, useMatch, useNavigate, useParams } from "react-router-dom";
-
-const routeData = [
-    // {
-    //     text: '首頁編輯',
-    //     routeTo: '/'
-    // },
-    {
-        text: '分類管理',
-        routeTo: '/category',
-    }, {
-        text: '顏色管理',
-        routeTo: '/color',
-    }, {
-        text: '產品列表',
-        routeTo: '/product',
-    }]
-export default function DrawerNavigation() {
+import { useNavigate } from "react-router-dom";
+import { childrenRoute } from '../router';
+export default function DrawerAside() {
     const navigate = useNavigate()
     const [isShow, setIsShow] = useState(false);
     const toggleDrawer =
@@ -40,11 +25,8 @@ export default function DrawerNavigation() {
 
                 setIsShow(isShow);
             };
-    const handleClickRoute = (routedata: {
-        text: string;
-        routeTo: string;
-    }) => {
-        navigate(routedata.routeTo)
+    const handleClickRoute = (toPath: string) => {
+        navigate(toPath)
     }
     return (
         <div>
@@ -65,10 +47,10 @@ export default function DrawerNavigation() {
                             onKeyDown={toggleDrawer(false)}
                         >
                             <List>
-                                {routeData.map(route => (
-                                    <ListItem key={route.text} disablePadding>
-                                        <ListItemButton onClick={() => handleClickRoute(route)}>
-                                            <ListItemText sx={{ textAlign: 'center' }} primary={route.text} />
+                                {childrenRoute.map(route => (
+                                    <ListItem key={route.path} disablePadding>
+                                        <ListItemButton onClick={() => handleClickRoute(route.path || "")}>
+                                            <ListItemText sx={{ textAlign: 'center' }} primary={route.name} />
                                         </ListItemButton>
                                     </ListItem>
                                 ))}

@@ -2,20 +2,14 @@ import { Card, Container, FormControl, InputLabel, MenuItem, Select, SelectChang
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { getProductDetailDataByProductIdApi, ResProductDataForDetailPage, ResColor, ResSubProduct, ResSeriesForDetailPage } from "../api/get"
-import { dispatchError, isNewSubproduct } from "../utils/errorHandler"
-import { SubProductCard } from "../component/subProductCard";
-import { isNumInt } from "../utils/isPostiveInt";
-import { FAKE_ID_FOR_CREATE } from "../const";
-import { EntityName, deleteOneApi } from "../api/entity";
-import { UpdateDto } from "../api/entityType";
-export const DetailPage = () => {
+import { FAKE_ID_FOR_CREATE } from "../../const";
+import { dispatchError } from "../../utils/errorHandler";
+import { EntityName, deleteOneByIdApi } from "../../api/entity";
+import { UpdateDto } from "../../api/entityType";
+
+export const ProductDetailPage = () => {
     const { productId } = useParams()
     const navigator = useNavigate()
-    const counterRef = useRef(FAKE_ID_FOR_CREATE)
-    const createIdForNew = () => {
-        counterRef.current += 1
-        return counterRef.current
-    }
     const [data, setData] = useState<ResProductDataForDetailPage>({
         id: Number(productId),
         name: '',
@@ -28,18 +22,6 @@ export const DetailPage = () => {
     const [colors, setColors] = useState<ResColor[]>([])
     const [series, setSeries] = useState<ResSeriesForDetailPage[]>([])
     const [toggleToRender, setToggleToRender] = useState(false)
-    const createEmptySubProductData = (): ResSubProduct => {
-        return {
-            product_id: Number(productId) as number,
-            id: createIdForNew(),
-            sort: 0,
-            price: 0,
-            color_id: colors[0].id,
-            size_s: 0,
-            size_m: 0,
-            size_l: 0
-        }
-    }
     const getProductDetailData = async () => {
         const numId = Number(productId)
         const { result, error } = await getProductDetailDataByProductIdApi(numId)
@@ -76,7 +58,7 @@ export const DetailPage = () => {
             dispatchError('請刪除所有副產品再刪除')
             return
         }
-        const executeDelete = await deleteOneApi(EntityName.Product,data.id)
+        const executeDelete = await deleteOneByIdApi(EntityName.Product,data.id)
         if (executeDelete.error) {
             return dispatchError(executeDelete.error)
         }
@@ -89,7 +71,7 @@ export const DetailPage = () => {
         }
         const targetSubproduct = data.sub_products[subproductIndex]
         if (!isNewSubproduct(targetSubproduct)) {
-            const executeDelete = await deleteOneApi(EntityName.SubProduct,targetSubproduct.id)
+            const executeDelete = await deleteOneByIdApi(EntityName.SubProduct,targetSubproduct.id)
             if (executeDelete.error) {
                 dispatchError(executeDelete.error)
                 return

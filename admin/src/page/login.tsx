@@ -13,19 +13,19 @@ export const LoginPage = () => {
             dispatchError('名稱與密碼不得為空')
             return
         }
-        const { result, error } = await loginApi({ name, password })
-        if (error) {
-            return dispatchError(error)
-        }
-        setToken(result)
-        dispatchSuccess('登入成功')
-        navigate('/category')
+        // const { result, error } = await loginApi({ name, password })
+        // if (error) {
+        //     return dispatchError(error)
+        // }
+        // setToken(result)
+        // dispatchSuccess('登入成功')
+        // navigate('/category')
     }
     const testToken = async () => {
-        const { result, error } = await testTokenApi()
-        if (result === true) {
-            navigate('/category')
-        }
+        // const { result, error } = await testTokenApi()
+        // if (result === true) {
+        //     navigate('/category')
+        // }
     }
     useEffect(() => {
         testToken()

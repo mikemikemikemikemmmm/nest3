@@ -1,9 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { router } from '../App'
 import { BASE_URL, ADMIN_API_PREFIX, TOKEN_HEADER } from '../const'
 import { pushAlertItem, setIsLoading, store } from '../store'
 import { dispatchError, getErrorMessenge } from '../utils/errorHandler'
 import { getToken } from '../utils/token'
+import { browserRouter } from '../router'
 // type TErrorRes = {
 //     error: string,
 //     result: undefined
@@ -33,7 +33,7 @@ baseApi.interceptors.response.use((response) => {
 }, function (error) {
     if (error.response) {
         if (error.response.status === 401) {
-            router.navigate('/')
+            browserRouter.navigate('/')
         }
         return error.response
     }
@@ -42,7 +42,7 @@ export const getBaseApi = async <ResponseType>(url: string) => {
     const { dispatch } = store
     dispatch(setIsLoading(true))
     const response = await baseApi.get(`/${ADMIN_API_PREFIX}/${url}`)
-    const {data} = response
+    const { data } = response
     dispatch(setIsLoading(false))
     if (data.error) {
         pushAlertItem({ severity: 'error', text: data.error })
@@ -55,7 +55,7 @@ export const postBaseApi = async <CreateDto>(url: string, createDto: CreateDto) 
     const { dispatch } = store
     dispatch(setIsLoading(true))
     const response = await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, createDto)
-    const {data} = response
+    const { data } = response
     dispatch(setIsLoading(false))
     if (data.error) {
         pushAlertItem({ severity: 'error', text: data.error })
@@ -68,7 +68,7 @@ export const patchBaseApi = async <UpdateDto>(url: string, updateDto: UpdateDto)
     const { dispatch } = store
     dispatch(setIsLoading(true))
     const response = await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, updateDto)
-    const {data} = response
+    const { data } = response
     dispatch(setIsLoading(false))
     if (data.error) {
         pushAlertItem({ severity: 'error', text: data.error })
@@ -81,7 +81,7 @@ export const deleteBaseApi = async (url: string) => {
     const { dispatch } = store
     dispatch(setIsLoading(true))
     const response = await baseApi.delete(`/${ADMIN_API_PREFIX}/${url}`)
-    const {data} = response
+    const { data } = response
     dispatch(setIsLoading(false))
     if (data.error) {
         pushAlertItem({ severity: 'error', text: data.error })

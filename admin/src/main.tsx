@@ -1,11 +1,12 @@
 import React from 'react'
 import { StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { store } from './store'
 import { Provider } from 'react-redux'
-
 import ReactDOM from 'react-dom/client'
-import App from './App'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import '../src/style/index.css'
+import { store } from './store'
+import { browserRouter } from './router';
 const mdTheme = createTheme({
   breakpoints: {
     values: {
@@ -17,13 +18,12 @@ const mdTheme = createTheme({
     },
   },
 });
-
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider theme={mdTheme}>
       <StyledEngineProvider injectFirst>
         <Provider store={store}>
-          <App />
+          <RouterProvider router={browserRouter} />
         </Provider>
       </StyledEngineProvider>
     </ThemeProvider>

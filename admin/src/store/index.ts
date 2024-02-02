@@ -51,7 +51,7 @@ export const appSlice = createSlice({
     },
 })
 
-export const { setIsLoading, _pustAlertListSingleItem, shiftAlertListItem, deleteAlertListItemById } = appSlice.actions
+export const { setIsShowModal,setIsLoading, _pustAlertListSingleItem, shiftAlertListItem, deleteAlertListItemById } = appSlice.actions
 export default appSlice.reducer
 
 export const store = configureStore({

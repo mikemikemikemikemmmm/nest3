@@ -1,43 +1,26 @@
-
-import React, { useEffect, useState } from "react";
-import { createBrowserRouter, createHashRouter, Route, RouterProvider, Routes } from "react-router-dom";
+import {  Outlet} from "react-router-dom";
 import { Box } from "@mui/material";
-
-import '../src/style/index.css'
-import { Category } from "./page/category";
-import { Color, ColorPage } from "./page/color";
-import { ProductPage } from "./page/product";
-import { DetailPage } from "./page/detail";
-import { LoginPage } from "./page/login";
-import { PageContainer } from "./component/pageContainer";
-export const router = createHashRouter([
-  {
-    path: "/",
-    element: <LoginPage />,
-  },
-  {
-    path: "/category",
-    element: <Category />,
-  },
-  {
-    path: "/color",
-    element: <ColorPage />,
-  },
-  {
-    path: "/product",
-    element: <ProductPage />,
-  },
-  {
-    path: "/detail/:productId",
-    element: <DetailPage />,
-  },
-]);
+import { LoadingContainer } from "./component/loading";
+import { AlertContainer } from "./component/alert";
+import DrawerAside from './component/drawerAside';
 export default function App() {
   console.log('app render')
   return (
-    <PageContainer>
-      <RouterProvider router={router} />
-    </PageContainer>
-
+    <>
+      <LoadingContainer />
+      <AlertContainer />
+      <Box
+        component="main"
+        sx={{
+          backgroundColor: (theme) => theme.palette.grey[100],
+          flexGrow: 1,
+          height: '100vh',
+          overflow: 'auto',
+        }}
+      >
+        <DrawerAside />
+        <Outlet />
+      </Box>
+    </>
   );
 }

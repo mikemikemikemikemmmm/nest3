@@ -1,8 +1,8 @@
 
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, setIsLoading } from '../../src/store'
+import { useSelector } from "react-redux";
+import { RootState } from '../../src/store'
 export const LoadingContainer = () => {
     const isLoading = useSelector((state: RootState) => state.appSlice.isLoading)
     return <Backdrop

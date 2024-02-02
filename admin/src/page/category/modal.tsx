@@ -1,33 +1,29 @@
 // import { Button, TextField } from '@mui/material'
 // import React, { useState } from 'react'
-// import { NavType } from '../page/_category'
-// import { dispatchError } from '../utils/errorHandler'
-// import { isNumInt } from '../utils/isPostiveInt'
-// import { EntityName, updateOneByIdApi } from '../api/entity'
-// import { UpdateDto } from '../api/entityType'
-// interface InputData {
-//     name: string,
-//     route: string,
-//     sort: number,
-//     parent_id: number,
-// }
-// export type ModalData = {
+// import { UpdateDto } from '../../api/entityType'
+// import { FAKE_ID_FOR_CREATE } from '../../const'
+// import { dispatchError } from '../../utils/errorHandler'
+// export const getEmptyCategoryModalData = () => ({
+//     id: FAKE_ID_FOR_CREATE,
+//     parentId: FAKE_ID_FOR_CREATE,
+//     text:"",
+//     route:"",
+//     order:0
+// })
+
+// export interface CategoryModalData extends UpdateDto.Nav {
 //     id: number,
-//     name: string,
-//     sort: number,
-//     route?: string
+//     parentId: number
 // }
 // interface Props {
 //     type: NavType
-//     modalData?: ModalData,
+//     modalDataProp: CategoryModalData,
 //     parentId?: number
 //     closeModalFn: () => void,
 //     toggleToRenderFn: () => void,
 // }
-// export const CategoryPageModal = (props: Props) => {
-//     const { type, modalData, parentId = -1, closeModalFn, toggleToRenderFn } = props
-//     const isPut = modalData
-//     const id = modalData?.id || -1
+// export const CategoryModal = (props: Props) => {
+//     const { type, modalDataProp, parentId = -1, closeModalFn, toggleToRenderFn } = props
 //     const initInputData = () => {
 //         let _data = {
 //             name: "",
@@ -161,9 +157,9 @@
 //             dispatchError('名字跟網址為必須，排序須為正整數')
 //             return
 //         }
-//         if (isPut){
+//         if (isPut) {
 //             handleUpdate()
-//         }else{
+//         } else {
 //             handleCreate()
 //         }
 //     }

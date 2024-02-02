@@ -1,20 +1,20 @@
 import { Card } from "@mui/material"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { getImgUrlBySubProductIdApi } from "../api/get"
+import { getImgUrlBySubProductIdApi } from "../api/staticFile"
 import { handleImgError } from "../utils/imgError"
 import errorImgUrl from '../assets/imgError.jpg'
 
 
-export const ProductCard = (props: { id: number, name: string, first_subproduct_id: number | null }) => {
-    const { id, name, first_subproduct_id } = props
+export const ProductCard = (props: { id: number, text: string, firstSubProductId: number | null }) => {
+    const { id, text, firstSubProductId } = props
     const [imgUrl, setImgUrl] = useState<'loading' | 'error' | string>('loading')
     const getProductImgUrl = () => {
-        if (first_subproduct_id === null) {
+        if (firstSubProductId === null) {
             setImgUrl(errorImgUrl)
             return
         }
-        const srcResult = getImgUrlBySubProductIdApi(first_subproduct_id)
+        const srcResult = getImgUrlBySubProductIdApi(firstSubProductId)
         setImgUrl(srcResult)
     }
     useEffect(() => { getProductImgUrl() }, [])
@@ -26,9 +26,9 @@ export const ProductCard = (props: { id: number, name: string, first_subproduct_
                         <div className="loading-ring"><div></div><div></div><div></div><div></div></div>
                     </div>
                     :
-                    <img style={{ width: '100%' }} src={imgUrl} alt={name} onError={e => handleImgError(e)} />
+                    <img style={{ width: '100%' }} src={imgUrl} alt={text} onError={e => handleImgError(e)} />
             }
-            <div>{name}</div>
+            <div>{text}</div>
         </Link>
     </Card>
 }

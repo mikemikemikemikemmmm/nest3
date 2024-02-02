@@ -1,4 +1,3 @@
-import { ResSubProduct } from "../api/get"
 import { pushAlertItem, store } from "../store"
 export const dispatchError = (error: string | Error | undefined | unknown) => {
     const messenge = getErrorMessenge(error)
@@ -32,8 +31,4 @@ export const isValidInput = <T extends object>(inputData: T, validData: ValidDat
         }
         return true
     })
-}
-
-export const isNewSubproduct = (subproductData: ResSubProduct) => {
-    return subproductData.id < 0
 }
