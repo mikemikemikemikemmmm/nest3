@@ -10,7 +10,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { handleImgError } from "../../utils/imgError"
 import { getColorImageUrlApi } from "../../api/staticFile"
 const COLOR_MODAL_IMG_DOM_ID = "COLOR_MODAL_IMG_DOM_ID"
-export interface ColorModalData extends UpdateDto.Color {
+export interface ColorModalData extends CreateDto.Color {
     id: number
 }
 export const ColorModal = (props: {
@@ -22,7 +22,7 @@ export const ColorModal = (props: {
     const dispatch = useDispatch()
     const { modalDataProp, forcedRender, closeModal, setTimestamp } = props
     const isCreate = modalDataProp.id === FAKE_ID_FOR_CREATE
-    const [modalData, setModalData] = useState<ColorModalData>({ ...modalDataProp })
+    const [modalData, setModalData] = useState<ColorModalData>(modalDataProp)
     const [nameHasFocused, setNameHasFocused] = useState(false)
     const [imageBase64Url, setImageBase64Url] = useState<string | null>(null)
     const handleSubmit = async () => {

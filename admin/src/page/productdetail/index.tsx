@@ -1,30 +1,34 @@
 import { Card, Container, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Button, TextField, Box } from "@mui/material";
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { getProductDetailDataByProductIdApi, ResProductDataForDetailPage, ResColor, ResSubProduct, ResSeriesForDetailPage } from "../api/get"
 import { FAKE_ID_FOR_CREATE } from "../../const";
 import { dispatchError } from "../../utils/errorHandler";
 import { EntityName, deleteOneByIdApi } from "../../api/entity";
-import { UpdateDto } from "../../api/entityType";
+import { GetOneResponse, UpdateDto } from "../../api/entityType";
 
 export const ProductDetailPage = () => {
     const { productId } = useParams()
+    const numberId = Number(productId)
     const navigator = useNavigate()
-    const [data, setData] = useState<ResProductDataForDetailPage>({
-        id: Number(productId),
+    const [productData, setProductData] = useState<GetOneResponse.Product>({
+        id: numberId,
         name: '',
         series_id: '',
         sort: 0,
         series_name: '',
-        sub_products: []
     })
-    const originData = useRef<ResProductDataForDetailPage | null>({ ...data, sub_products: [] })
-    const [colors, setColors] = useState<ResColor[]>([])
-    const [series, setSeries] = useState<ResSeriesForDetailPage[]>([])
+    const [subProductData, setSubProductData] = useState<GetOneResponse.SubProduct[]>([{
+        id: numberId,
+        name: '',
+        series_id: '',
+        sort: 0,
+        series_name: '',
+    }])
+    const [colors, setColors] = useState<GetOneResponse.Color[]>([])
+    const [naviationData, setNaviationData] = useState<NavigationData[]>([])
     const [toggleToRender, setToggleToRender] = useState(false)
     const getProductDetailData = async () => {
-        const numId = Number(productId)
-        const { result, error } = await getProductDetailDataByProductIdApi(numId)
+        const { result, error } = await getProductDetailDataByProductIdApi(numberId)
         if (error || !result || Array.isArray(result) || isNaN(numId)) {
             dispatchError(error)
             return
@@ -39,31 +43,14 @@ export const ProductDetailPage = () => {
     useEffect(() => {
         getProductDetailData()
     }, [toggleToRender])
-    const handleEditProduct = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof data) => {
-        const propType = typeof data[key] as 'string' | 'number'
-        const { value } = e.target
-        let _value: number | string = value
-        if (propType === 'number') {
-            _value = Number(value)
-        }
-        setData({ ...data, [key]: _value })
-    }
+    useEffect(() => {
+        getColors
+        getNavigations
+    }, [])
     const handleCreateSubProduct = () => {
         const newSubProduct = createEmptySubProductData()
         originData.current?.sub_products.push({ ...newSubProduct })
         setData({ ...data, sub_products: [...data.sub_products, { ...newSubProduct }] })
-    }
-    const handleDeleteProduct = async () => {
-        if (data.sub_products.length > 0) {
-            dispatchError('請刪除所有副產品再刪除')
-            return
-        }
-        const executeDelete = await deleteOneByIdApi(EntityName.Product,data.id)
-        if (executeDelete.error) {
-            return dispatchError(executeDelete.error)
-        }
-        navigator('/product')
-        //TODO
     }
     const handleDeleteSubproduct = async (subproductIndex: number) => {
         if (!confirm('確認刪除嗎')) {
@@ -71,7 +58,7 @@ export const ProductDetailPage = () => {
         }
         const targetSubproduct = data.sub_products[subproductIndex]
         if (!isNewSubproduct(targetSubproduct)) {
-            const executeDelete = await deleteOneByIdApi(EntityName.SubProduct,targetSubproduct.id)
+            const executeDelete = await deleteOneByIdApi(EntityName.SubProduct, targetSubproduct.id)
             if (executeDelete.error) {
                 dispatchError(executeDelete.error)
                 return

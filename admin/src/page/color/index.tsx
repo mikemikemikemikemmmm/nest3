@@ -4,7 +4,7 @@ import { FAKE_ID_FOR_CREATE, FORMDATA_KEY_FOR_FILE } from "../../const";
 import { GetOneResponse } from "../../api/entityType";
 import { ColorModal, ColorModalData } from "./modal";
 import { ColorCard } from "./card";
-import { EntityName, getAllApi } from "../../api/entity";
+import { EntityName, deleteOneByIdApi, getAllApi } from "../../api/entity";
 import { ModalContainer } from "../../component/modalContainer";
 import { dispatchError } from "../../utils/errorHandler";
 import { ProductCard } from "../../component/productCard";
@@ -23,11 +23,11 @@ export const ColorPage = () => {
         setModalDataProp(getEmptyColorModalData())
         setIsModalShow(false)
     }
-    const handleCreate=()=>{
+    const handleCreate = () => {
         setModalDataProp(getEmptyColorModalData())
         setIsModalShow(true)
     }
-    const handleEditColor = (colorModalData: ColorModalData) => {
+    const handleEdit = (colorModalData: ColorModalData) => {
         setModalDataProp(colorModalData)
         setIsModalShow(true)
     }
@@ -61,13 +61,22 @@ export const ColorPage = () => {
                 </Stack>
             </ModalContainer>)
     }
-    const handleSelectColor = async (colorId: number) => {
+    const handleSelect = async (colorId: number) => {
         const { result, error } = await getProductCardDataByColorIdApi(colorId)
         if (error || !result) {
             dispatchError('產生錯誤')
             return
         }
         setProductCard(result)
+    }
+    const handleDelete = async (id: number) => {
+        // e.stopPropagation()
+        if (confirm('確定刪除嗎')) {
+            const executeDelete = await deleteOneByIdApi(EntityName.Color, id)
+            if (!executeDelete.error) {
+                forcedRender()
+            }
+        }
     }
     useEffect(() => {
         getColorsData()
@@ -86,12 +95,11 @@ export const ColorPage = () => {
                     </Grid>
                     {
                         colorsData.map(c => <ColorCard
-                            handleEditColor={handleEditColor}
-                            handleSelectColor={handleSelectColor}
+                            handleEdit={handleEdit}
+                            handleSelect={handleSelect}
+                            handleDelete={handleDelete}
                             key={c.id}
-                            id={c.id}
-                            name={c.name}
-                            forcedRender={forcedRender} />)
+                            colorData={c} />)
                     }
                 </Grid>
                 <Grid container sx={{ margin: 1 }} spacing={2}>

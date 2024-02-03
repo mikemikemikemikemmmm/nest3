@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import { EntityName } from "../../api/entity"
+import { EntityName, deleteOneByIdApi } from "../../api/entity"
 import { FAKE_ID_FOR_CREATE } from "../../const"
 import { NavigationItem } from "./navigationItem"
 import { Category } from "@mui/icons-material"
 import { ModalContainer } from "../../component/modalContainer"
 import { Stack } from "@mui/material"
-import { NavigationModal } from "./modal"
+import { NavigationModal, NavigationModalData } from "./modal"
 import { NavigationTreeItem, NavigationTreeItemType, SeriesTreeItem, getNavigationTreeApi, getSeriesTreeBySubCategoryIdApi } from "../../api/page/navigation"
 const getEmptyModalData = (type: NavigationTreeItemType, parentId: number) => ({
     id: FAKE_ID_FOR_CREATE,
@@ -13,7 +13,6 @@ const getEmptyModalData = (type: NavigationTreeItemType, parentId: number) => ({
     order: 0,
     type,
     parentId,
-    children: []
 })
 export const NavigationPage = () => {
     const [navigationTreeData, setNavigationTreeData] = useState<NavigationTreeItem[] | undefined>(undefined)
@@ -21,7 +20,7 @@ export const NavigationPage = () => {
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | undefined>(undefined)
     const [seriesTreeData, setSeriesTreeData] = useState<SeriesTreeItem[]>([])
     const [isModalShow, setIsModalShow] = useState(false)
-    const [modalDataProp, setModalDataProp] = useState<NavigationTreeItem>(() => getEmptyModalData(EntityName.Menu, FAKE_ID_FOR_CREATE))
+    const [modalDataProp, setModalDataProp] = useState<NavigationModalData>(() => getEmptyModalData(EntityName.Menu, FAKE_ID_FOR_CREATE))
     const handleEdit = (treeItem: NavigationTreeItem) => {
         setModalDataProp(treeItem)
         setIsModalShow(true)
@@ -30,7 +29,13 @@ export const NavigationPage = () => {
         setModalDataProp(getEmptyModalData(type, parentId))
         setIsModalShow(true)
     }
-    const handleDelete = (id: number, type: NavigationTreeItemType) => {
+    const handleDelete = async (id: number, type: NavigationTreeItemType) => {
+        if (confirm('確定刪除嗎')) {
+            const executeDelete = await deleteOneByIdApi(type, id)
+            if (!executeDelete.error) {
+                // forcedRender() TODO
+            }
+        }
     }
     const closeModal = () => {
         setModalDataProp(getEmptyModalData(EntityName.Menu, FAKE_ID_FOR_CREATE))

@@ -8,8 +8,7 @@ import { EntityName, createOneApi, updateOneByIdApi } from "../../api/entity"
 import { Box, Button, IconButton, TextField } from "@mui/material"
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { handleImgError } from "../../utils/imgError"
-import { getColorImageUrlApi } from "../../api/staticFile"
-export interface ProductModalData extends UpdateDto.Product {
+export interface ProductModalData extends CreateDto.Product {
     id: number
 }
 export const ProductModal = (props: {
@@ -17,9 +16,7 @@ export const ProductModal = (props: {
     closeModal: () => void,
     forcedRender: () => void,
 }) => {
-    const dispatch = useDispatch()
     const { modalDataProp, forcedRender, closeModal } = props
-    const isCreate = modalDataProp.id === FAKE_ID_FOR_CREATE
     const [modalData, setModalData] = useState<ProductModalData>({ ...modalDataProp })
     const [nameHasFocused, setNameHasFocused] = useState(false)
     const handleSubmit = async () => {
@@ -28,9 +25,10 @@ export const ProductModal = (props: {
             dispatchError('名稱為必須')
             return
         }
+        const isCreate = modalDataProp.id === FAKE_ID_FOR_CREATE
         if (isCreate) {
             const execute =
-                await createOneApi<CreateDto.Color>(EntityName.Color, modalData as CreateDto.Color)
+                await createOneApi<CreateDto.Product>(EntityName.Product, modalData)
             if (!execute.error) {
                 closeModal()
                 forcedRender()
@@ -57,21 +55,6 @@ export const ProductModal = (props: {
                 variant="outlined"
                 defaultValue={modalData.name}
                 onChange={(e) => handleChangeName(e)} />
-            <Box sx={{ margin: 1, padding: 1, display: 'flex', justifyContent: 'center' }}>
-                <img
-                    id={COLOR_MODAL_IMG_DOM_ID}
-                    style={{
-                        width: imageBase64Url ? COLOR_IMG_WIDTH : 0,
-                        height: imageBase64Url ? COLOR_IMG_HEIGHT : 0
-                    }}
-                    src={getImagePreviewUrl()}
-                    onError={(e) => handleImgError(e)} />
-                <IconButton color="primary" component="label">
-                    <AddPhotoAlternateIcon />
-                    <input hidden accept=".jpg" type="file" onChange={e => handleUploadImg(e)} />
-                </IconButton>
-            </Box>
-            <div>上傳圖片 僅限 48px x 48px jpg檔案</div>
             <Button variant="contained" onClick={() => handleSubmit()}>送出</Button>
         </>
     )

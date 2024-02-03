@@ -1,7 +1,7 @@
 
 export namespace CreateDto {
-    interface ImageFileMixin{
-        imageFile:File
+    interface ImageFileMixin {
+        imageFile: File
     }
     interface NavItemMixin {
         name: string,
@@ -36,13 +36,13 @@ export namespace CreateDto {
         genderId: number
         seriesId: number,
     }
-    export interface SubProduct extends ImageFileMixin{
+    export interface SubProduct extends ImageFileMixin {
         productId: number,
         colorId: number,
         price: number
         order: number
     }
-    export interface Color extends ImageFileMixin{
+    export interface Color extends ImageFileMixin {
         name: string
     }
     export interface Gender {
@@ -52,7 +52,7 @@ export namespace CreateDto {
         name: string
     }
 }
-export namespace UpdateDto{
+export namespace UpdateDto {
     export type User = Partial<CreateDto.User>
     export type Editing = Partial<CreateDto.Editing>
     export type Gender = Partial<CreateDto.Gender>
@@ -66,14 +66,14 @@ export namespace UpdateDto{
     export type Size = Partial<CreateDto.Size>
 }
 interface IdMixin {
-    id:number
+    id: number
 }
-export namespace GetOneResponse{
-    export type User = CreateDto.User & IdMixin
+export namespace GetOneResponse {
+    export interface User extends CreateDto.User, IdMixin {}
     export type Editing = CreateDto.Editing & IdMixin
     export type Gender = CreateDto.Gender & IdMixin
     export type Color = CreateDto.Color & IdMixin
-    export type Menu =CreateDto.Menu & IdMixin
+    export type Menu = CreateDto.Menu & IdMixin
     export type Category = CreateDto.Category & IdMixin
     export type SubCategory = CreateDto.SubCategory & IdMixin
     export type Series = CreateDto.Series & IdMixin

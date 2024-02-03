@@ -1,21 +1,15 @@
 import { Card, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent, Button, TextField, Box } from "@mui/material";
 import { useRef, useState } from "react"
-import { getImgUrlBySubProductIdApi, ResColor, ResSubProduct } from "../api/get"
+import { useDispatch } from "react-redux";
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { dispatchError, isNewSubproduct } from "../utils/errorHandler"
-import { handleImgError } from "../utils/imgError";
-import { useDispatch } from "react-redux";
-import { setIsLoading } from "../store";
-import { SUB_PRODUCT_IMG_HEIGHT, SUB_PRODUCT_IMG_WIDTH } from "../const";
+import { GetOneResponse } from "../../api/entityType";
 export const SubProductCard = (props: {
-    deleteSubproduct: (subproductIndex: number) => void
-    data: ResSubProduct
-    subProductIndex: number,
-    handleSetSubproductDataByIndex: (index: number, data: ResSubProduct) => void,
-    colorsData: ResColor[]
+    handleDelete: (subProductId: number) => void
+    handleEdit: (subProductId: number) => void
+    subProductData: GetOneResponse.SubProduct
 }) => {
-    const { colorsData, data, handleSetSubproductDataByIndex, deleteSubproduct, subProductIndex } = props
+    const { handleDelete, handleEdit, subProductData } = props
     const dispatch = useDispatch()
     const isNew = isNewSubproduct(data)
     const imgEl = useRef<HTMLImageElement>(null)
@@ -53,7 +47,7 @@ export const SubProductCard = (props: {
             const img = new Image()
             img.onload = () => {
                 const { width, height } = img
-                if (width !== SUB_PRODUCT_IMG_WIDTH || 
+                if (width !== SUB_PRODUCT_IMG_WIDTH ||
                     height !== SUB_PRODUCT_IMG_HEIGHT) {
                     dispatchError('長寬有一不為500px')
                     dispatch(setIsLoading(false))

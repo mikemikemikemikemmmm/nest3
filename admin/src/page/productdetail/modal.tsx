@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux"
 import { EntityName, createOneApi, updateOneByIdApi } from "../../api/entity"
 import { handleImgError } from "../../utils/imgError"
 import { Box, Button, IconButton, TextField } from "@mui/material"
-export interface SubProductModalData extends UpdateDto.SubProduct {
+export interface SubProductModalData extends CreateDto.SubProduct {
     id: number
 }
 interface Props {

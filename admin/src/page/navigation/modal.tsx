@@ -9,14 +9,14 @@ export const NavigationModal = (props: {
     closeModal: () => void,
 }) => {
     const { modalDataProp, closeModal } = props
-    const isUpdate = modalDataProp.id !== FAKE_ID_FOR_CREATE
-    const [modalData, setModalData] = useState<NavigationModalData>({ ...modalDataProp })
+    const [modalData, setModalData] = useState<NavigationModalData>(modalDataProp)
     const handleSubmit = async () => {
+        const isCreate = modalDataProp.id === FAKE_ID_FOR_CREATE
         const targetApi = () => {
-            if (isUpdate) {
-                return updateOneByIdApi(modalData.type, modalData.id, modalData)
+            if (isCreate) {
+                return createOneApi(modalData.type, modalData)
             }
-            return createOneApi(modalData.type, modalData)
+            return updateOneByIdApi(modalData.type, modalData.id, modalData)
         }
         const execute = await targetApi()
         const { result, error } = execute

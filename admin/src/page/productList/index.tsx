@@ -3,6 +3,7 @@ import { Container, Grid, Button, TextField, Stack, FormControl, InputLabel, Sel
 import { ProductModal, ProductModalData } from "./modal"
 import { FAKE_ID_FOR_CREATE } from "../../const";
 import { ModalContainer } from "../../component/modalContainer";
+import { ProductCard } from "./card";
 const getEmptyProductModalData = () => ({
     id: FAKE_ID_FOR_CREATE,
     name: "",
@@ -21,11 +22,11 @@ export const ProductListPage = () => {
         setToggleToRender(!toggleToRender)
     }
     const closeModal = () => {
-        setModalDataProp(() => getEmptyProductModalData())
+        setModalDataProp(getEmptyProductModalData())
         setIsModalShow(false)
     }
     const handleCreate = () => {
-        setModalDataProp(() => getEmptyProductModalData())
+        setModalDataProp(getEmptyProductModalData())
         setIsModalShow(true)
     }
     const handleEdit = (productModalData: ProductModalData) => {
@@ -64,6 +65,12 @@ export const ProductListPage = () => {
     useEffect(() => {
         getProductsAndSeriesOnProductPage()
     }, [toggleToRender])
+    const handleDelete = (id: number) => {
+        //TODO
+    }
+    const handleSelect = (id: number) => {
+        //TODO
+    }
     return (
         <>
             {
@@ -78,7 +85,13 @@ export const ProductListPage = () => {
                     </Grid>
                     {productsData.map(p => (
                         <Grid key={p.id} item lg={2} md={3} sm={6} xs={12}>
-                            <ProductCard key={p.id} id={p.id} name={p.name} first_subproduct_id={p.first_subproduct_id} />
+                            <ProductCard
+                                key={p.id}
+                                productCardData={p}
+                                handleDelete={handleDelete}
+                                handleSelect={handleSelect}
+                                handleEdit={handleEdit}
+                            />
                         </Grid>
                     ))}
                 </Grid>
