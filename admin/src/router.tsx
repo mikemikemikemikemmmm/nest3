@@ -2,10 +2,11 @@ import { RouteObject, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import { ColorPage } from "./page/color";
 import { LoginPage } from "./page/login";
-import { ProductDetailPage } from "./page/productdetail";
 import { NavigationPage } from "./page/navigation";
+import { ProductListPage } from "./page/productList";
+import { ProductDetailPage } from "./page/productdetail";
 import { StockPage } from "./page/stock";
-export const childrenRoute: (RouteObject & { name: string })[] = [
+export const childrenRoute: (RouteObject & { name: string, showOnDrawer?: boolean })[] = [
     {
         path: "/",
         element: <LoginPage />,
@@ -24,18 +25,25 @@ export const childrenRoute: (RouteObject & { name: string })[] = [
     {
         path: "/productList",
         element: <ProductListPage />,
-        name: "產品列表"
+        name: "產品列表",
     },
     {
-        path: "/productDetail/:productId",
-        element: <ProductDetailPage />,
-        name: "產品細節"
+        path: "/detail/:productId",
+        name: "產品細節",
+        showOnDrawer: false,
+        element: <ProductDetailPage />
     },
     {
         path: "/stock",
-        element: <StockPage />,
-        name: "存貨"
-    }
+        name: "存貨",
+        element: <StockPage />
+    },
+    {
+        path: "*",
+        name:"index",
+        showOnDrawer: false,
+        element: <LoginPage />
+    },
 ]
 
 export const browserRouter = createBrowserRouter([

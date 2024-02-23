@@ -1,231 +1,189 @@
-import { Card, Container, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Button, TextField, Box } from "@mui/material";
+import { Card, Container, Button, Box, Stack, Grid } from "@mui/material";
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { FAKE_ID_FOR_CREATE } from "../../const";
-import { dispatchError } from "../../utils/errorHandler";
-import { EntityName, deleteOneByIdApi } from "../../api/entity";
-import { GetOneResponse, UpdateDto } from "../../api/entityType";
-
+import { FAKE_ID_FOR_CREATE, KEY_FOR_UPLOAD_IMAGE_FORM_DATA } from "../../const";
+import { EntityName, deleteOneByIdApi, getAllApi, getOneByIdApi } from "../../api/entity";
+import { GetOneResponse } from "../../api/entityType";
+import { SubProductCard } from "./subProductCard";
+import { SubProductModal, SubProductModalDataProp } from "./subProductModal";
+import { ModalContainer } from "../../component/modalContainer";
+import { getProductImgUrlApi } from "@/api/staticFile";
+import { handleImgError } from "@/utils/imgError";
+import { ProductModalDataProp } from "../productList/modal";
+const createEmptySubProductData = (productId: number, color: GetOneResponse.Color): SubProductModalDataProp => ({
+    id: FAKE_ID_FOR_CREATE,
+    colorId: color.id,
+    productId,
+    price: 1,
+    order: 1,
+    imageFile: new File([], KEY_FOR_UPLOAD_IMAGE_FORM_DATA),
+    sizeIdList: []
+})
 export const ProductDetailPage = () => {
     const { productId } = useParams()
-    const numberId = Number(productId)
-    const navigator = useNavigate()
-    const [productData, setProductData] = useState<GetOneResponse.Product>({
-        id: numberId,
-        name: '',
-        series_id: '',
-        sort: 0,
-        series_name: '',
-    })
-    const [subProductData, setSubProductData] = useState<GetOneResponse.SubProduct[]>([{
-        id: numberId,
-        name: '',
-        series_id: '',
-        sort: 0,
-        series_name: '',
-    }])
-    const [colors, setColors] = useState<GetOneResponse.Color[]>([])
-    const [naviationData, setNaviationData] = useState<NavigationData[]>([])
+    const navigate = useNavigate()
+    if (!productId) {
+        navigate("/")
+    }
+    const numberProductId = Number(productId)
+    const [subproductModalDataProp, setSubproductModalDataProp] = useState<SubProductModalDataProp | undefined>(undefined)
+    const [product, setProduct] = useState<GetOneResponse.Product>()
+    const [sizes, setSizes] = useState<GetOneResponse.Size[]>()
+    const [subProducts, setSubProducts] = useState<GetOneResponse.SubProduct[]>()
+    const [colors, setColors] = useState<GetOneResponse.Color[]>()
     const [toggleToRender, setToggleToRender] = useState(false)
-    const getProductDetailData = async () => {
-        const { result, error } = await getProductDetailDataByProductIdApi(numberId)
-        if (error || !result || Array.isArray(result) || isNaN(numId)) {
-            dispatchError(error)
-            return
+    const getColors = async () => {
+        const result = await getAllApi<GetOneResponse.Color[]>(EntityName.Color)
+        if (result?.isSuccess) {
+            setColors(result.data)
         }
-        const { colors, series, product } = result
-        const targetProcutData = product[0]
-        setData(targetProcutData)
-        setColors(colors)
-        setSeries(series)
-        originData.current = { ...targetProcutData, sub_products: targetProcutData.sub_products.map(sp => { return { ...sp } }) }
+    }
+    const getSizes = async () => {
+        const result = await getAllApi<GetOneResponse.Size[]>(EntityName.Size)
+        if (result?.isSuccess) {
+            setSizes(result.data)
+        }
+    }
+    const getProduct = async () => {
+        const result = await getOneByIdApi<GetOneResponse.Product>(EntityName.Product, numberProductId)
+        if (result?.isSuccess && result.data) {
+            setProduct(result.data)
+        } else {
+            navigate("/")
+        }
+    }
+    const getSubproducts = async () => {
+        const result = await getAllApi<GetOneResponse.SubProduct[]>(EntityName.SubProduct, { productId: productId as string })
+        if (result?.isSuccess) {
+            setSubProducts(result.data)
+        }
+    }
+    const getAll = async () => {
+        const apis = [getColors(), getProduct(), getSizes()]
+        await Promise.all(apis)
     }
     useEffect(() => {
-        getProductDetailData()
-    }, [toggleToRender])
-    useEffect(() => {
-        getColors
-        getNavigations
+        getAll()
     }, [])
+    useEffect(() => {
+        getSubproducts()
+    }, [toggleToRender])
+    if (!subProducts || !product || !colors || !sizes) {
+        return null
+    }
+    const closeModal = () => {
+        setSubproductModalDataProp(undefined)
+    }
     const handleCreateSubProduct = () => {
-        const newSubProduct = createEmptySubProductData()
-        originData.current?.sub_products.push({ ...newSubProduct })
-        setData({ ...data, sub_products: [...data.sub_products, { ...newSubProduct }] })
+        const targetColor = colors?.[0] as GetOneResponse.Color
+        setSubproductModalDataProp(createEmptySubProductData(numberProductId, targetColor))
     }
-    const handleDeleteSubproduct = async (subproductIndex: number) => {
-        if (!confirm('確認刪除嗎')) {
-            return
-        }
-        const targetSubproduct = data.sub_products[subproductIndex]
-        if (!isNewSubproduct(targetSubproduct)) {
-            const executeDelete = await deleteOneByIdApi(EntityName.SubProduct, targetSubproduct.id)
-            if (executeDelete.error) {
-                dispatchError(executeDelete.error)
-                return
+    const handleDeleteSubproduct = async (subproductId: number) => {
+        if (confirm("確定刪除嗎")) {
+            const execute = await deleteOneByIdApi(EntityName.SubProduct, subproductId)
+            if (execute?.isSuccess) {
+                renderToGetNewData()
             }
         }
-        const copySubproductList = [...data.sub_products]
-        copySubproductList.splice(subproductIndex, 1)
-        setData({ ...data, sub_products: copySubproductList })
     }
-    const handleSetSubproductDataByIndex = (index: number, inputData: ResSubProduct) => {
-        const copy = [...data.sub_products]
-        copy[index] = inputData
-        setData({ ...data, sub_products: copy })
-    }
-    const handleSelectSeries = (e: SelectChangeEvent<number>) => {
-        const { value } = e.target
-        const _value = Number(value)
-        if (isNaN(_value) || !Number.isInteger(_value)) {
-            dispatchError('請選擇整數字')
-            return
-        }
-        setData({ ...data, series_id: _value })
-    }
-    const isVaildAllInput = () => {
-        return data.name !== '' &&
-            data.series_id !== '' &&
-            isNumInt(data.series_id, data.sort) &&
-            data.sub_products.every(sp => {
-                return isNumInt(sp.color_id, sp.price, sp.product_id, sp.size_l, sp.size_m, sp.size_s, sp.sort)
-            })
-    }
-    const isAllColorIdDiff = () => {
-        const map = {} as { [key: number]: boolean }
-        return data.sub_products.every(sp => {
-            if (!map[sp.color_id]) {
-                map[sp.color_id] = true
-                return true
+    const handleDeleteProduct = async () => {
+        if (confirm("確定刪除嗎")) {
+            const execute = await deleteOneByIdApi(EntityName.Product, numberProductId)
+            if (execute?.isSuccess) {
+                navigate("/productList")
             }
-            return false
-        })
-    }
-    const isAllHasFile = () => {
-        return data.sub_products.every(sp => {
-            if (isNewSubproduct(sp)) {
-                return !!sp.file
-            }
-            return true
-        })
-    }
-    const handleSubmit = async () => { //TODO
-        if (!isVaildAllInput()) {
-            dispatchError('名稱為必須，其餘需為正整數')
-            return
-        }
-        if (!isAllColorIdDiff()) {
-            dispatchError('請確保所有顏色只有一個')
-            return
-        }
-        if (!isAllHasFile()) {
-            dispatchError('請確保所有副產品都有圖片')
-            return
-        }
-        try {
-            const dtoToPut = (() => {
-                const origin = originData.current as ResProductDataForDetailPage
-                const dto = { ...data, sub_products: [] } as UpdateDto.Product
-                (Object.keys(data) as (keyof ResProductDataForDetailPage)[]).forEach(key => {
-                    if (key === 'sub_products') {
-                        const originSubprodctList = origin.sub_products
-                        data.sub_products.forEach(sp => {
-                            if (isNewSubproduct(sp)) {
-                                dto.sub_products.push({ ...sp })
-                                return
-                            }
-                            //put subproduct
-                            const spDto = { ...sp } as PutSubproduct
-                            const targetOriginSubporduct = originSubprodctList.find(originSp => originSp.id === sp.id)
-                            if (!targetOriginSubporduct) {
-                                dispatchError('error')
-                                throw new Error("")
-                            }
-                            (Object.keys(sp) as (keyof PutSubproduct)[]).forEach((key: keyof PutSubproduct) => {
-                                if (key === 'id') {
-                                    return
-                                }
-                                if (spDto[key] === targetOriginSubporduct[key]) {
-                                    delete spDto[key]
-                                }
-                            })
-                            if (Object.keys(spDto).length <= 1) { //only id
-                                return  //no need to put
-                            }
-                            dto.sub_products.push(spDto)
-                        })
-                    } else if (key === 'id') {
-                        return
-                    }
-                    else if (dto[key] === origin[key] || key === 'series_name') {
-                        delete dto[key]
-                    }
-                })
-                return dto
-            })()
-            const executePut = await putProductApi(dtoToPut)
-            if (executePut?.error) {
-                dispatchError(executePut.error)
-                return
-            }
-            setToggleToRender(!toggleToRender)
-        } catch (error) {
-            dispatchError(error)
         }
     }
-    const handleRerender = () => {
+    const handleEditSubproduct = (subproductData: GetOneResponse.SubProduct) => {
+        setSubproductModalDataProp(subproductData)
+    }
+    const renderToGetNewData = () => {
         setToggleToRender(!toggleToRender)
+    }
+    const renderProductImage = () => {
+        const { imageCount } = product
+        const domList = [] as JSX.Element[]
+        for (let i = 0; i < imageCount; i++) {
+            const imgGrid = (
+                <Grid item lg={2} md={3} sm={6} xs={12} key={i} >
+                    <img
+                        width={"100%"}
+                        onError={(e) => handleImgError(e)}
+                        src={getProductImgUrlApi(product.id, i + 1, product.updated_at)} />
+                </Grid>)
+            domList.push(imgGrid)
+        }
+        return domList
+    }
+    if (!subProducts || !product || !colors || !sizes) {
+        return null
     }
     return (
         <Container>
-            <Card variant="outlined" sx={{ padding: 1, margin: 1 }}>
-                <Box sx={{ textAlign: 'right' }}>
-                    <Button sx={{ margin: 1 }} variant="contained" onClick={() => handleSubmit()}>
-                        確認修改
-                    </Button>
-                    <Button sx={{ margin: 1 }} variant="contained" onClick={() => handleCreateSubProduct()}>
+            <ModalContainer closeFn={closeModal} isOpen={subproductModalDataProp !== undefined}>
+                <Stack spacing={2}>
+                    <SubProductModal
+                        modalDataProp={subproductModalDataProp as SubProductModalDataProp}
+                        closeModal={closeModal}
+                        subProducts={subProducts || []}
+                        sizes={sizes || []}
+                        colors={colors || []}
+                        renderToGetNewData={renderToGetNewData}
+                    />
+                </Stack>
+            </ModalContainer>
+            <Card sx={{ marginBottom: 2, padding: 1 }}>
+                <Box margin={1} display={"flex"}>
+                    名稱：{product?.name}-{product?.genderName}
+                    <Button
+                        variant="outlined"
+                        style={{ marginLeft: "auto" }}
+                        onClick={() => handleCreateSubProduct()}
+                    >
                         新增副產品
                     </Button>
-                    <Button sx={{ margin: 1 }} variant="contained" onClick={() => handleDeleteProduct()}>
-                        刪除該產品
+                    <Button
+                        variant="contained"
+                        sx={{ marginLeft: 1 }}
+                        onClick={() => handleDeleteProduct()}
+                    >
+                        刪除產品
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{ marginLeft: 1 }}
+                        onClick={() => handleDeleteProduct()}
+                    >
+                        修改產品
                     </Button>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <TextField sx={{ margin: 1 }} size="small" margin="dense" label="名字" type={'text'} value={data.name} onChange={(e) => handleEditProduct(e, 'name')} />
-                    <TextField sx={{ margin: 1 }} size="small" margin="dense" label="排序" type={'number'} value={data.sort} onChange={(e) => handleEditProduct(e, 'sort')} />
-                    <FormControl sx={{ margin: 1 }} size="small" margin="dense">
-                        <InputLabel id="productModalColorsSelect">系列</InputLabel>
-                        <Select
-                            labelId="productModalColorsSelect"
-                            value={data.series_id}
-                            label="系列"
-                            onChange={e => handleSelectSeries(e)}
-                        >
-                            {
-                                series.map(s => (
-                                    <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
-                                ))
-                            }
-                        </Select>
-                    </FormControl>
-                </Box>
+                <Box margin={1}>排序：{product?.order}</Box>
+                <Box margin={1}>種類：{product?.navigationName}</Box>
+                <Box margin={1}>
+                    <Grid container spacing={1}>
+                        {
+                            renderProductImage()
+                        }
+                    </Grid></Box>
             </Card>
-
-            {
-                data.sub_products.length === 0 ?
-                    <Box sx={{ margin: 1, textAlign: 'center' }}>
-                        沒有副產品
-                    </Box>
-                    :
-                    data.sub_products.map((sp, i) => (
-                        <SubProductCard
-                            data={data.sub_products[i]}
-                            handleSetSubproductDataByIndex={handleSetSubproductDataByIndex}
-                            deleteSubproduct={handleDeleteSubproduct}
-                            key={sp.id}
-                            colorsData={colors}
-                            subProductIndex={i} />
-                    ))
-            }
+            <Grid container spacing={2}>
+                {
+                    (subProducts === undefined || subProducts.length === 0) ?
+                        <Grid item xs={12} sx={{ margin: 1, textAlign: 'center', fontSize: 30 }}>
+                            沒有副產品
+                        </Grid>
+                        :
+                        subProducts.map(sp => (
+                            <Grid item lg={4} md={6} xs={12} key={sp.id} >
+                                <SubProductCard
+                                    subProductData={sp}
+                                    handleEdit={handleEditSubproduct}
+                                    handleDelete={handleDeleteSubproduct}
+                                />
+                            </Grid>
+                        ))
+                }
+            </Grid>
         </Container>
     )
 }

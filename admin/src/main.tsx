@@ -8,6 +8,18 @@ import '../src/style/index.css'
 import { store } from './store'
 import { browserRouter } from './router';
 const mdTheme = createTheme({
+  components: {
+    MuiButton: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
+    MuiTextField:{
+      defaultProps: {
+        size: 'small',
+      },
+    }
+  },
   breakpoints: {
     values: {
       xs: 0,

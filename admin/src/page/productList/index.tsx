@@ -1,101 +1,177 @@
 import { useEffect, useState } from "react"
-import { Container, Grid, Button, TextField, Stack, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { ProductModal, ProductModalData } from "./modal"
-import { FAKE_ID_FOR_CREATE } from "../../const";
+import { Grid, Button, Stack, Card, TextField, MenuItem, CircularProgress, Box } from "@mui/material";
+import { ProductModal, ProductModalDataProp } from "./modal"
+import { CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR, FAKE_ID_FOR_CREATE } from "../../const";
 import { ModalContainer } from "../../component/modalContainer";
-import { ProductCard } from "./card";
-const getEmptyProductModalData = () => ({
+import { GetOneResponse } from "../../api/entityType";
+import { EntityName, deleteOneByIdApi, getAllApi } from "../../api/entity";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ProductListItemData, getProductListDataApi } from "@/api/page/productList";
+import { checkPositiveInt } from "@/utils/textInput";
+import { dispatchError } from "@/utils/errorHandler";
+import { ProductListItem } from "./ProductListItem";
+const getEmptyProductModalData = (seriesId: number = FAKE_ID_FOR_CREATE, genderId: number = FAKE_ID_FOR_CREATE) => ({
     id: FAKE_ID_FOR_CREATE,
     name: "",
-    order: 0,
-    genderId: FAKE_ID_FOR_CREATE,
-    seriesId: FAKE_ID_FOR_CREATE
+    order: 1,
+    genderId,
+    seriesId,
+    imageFiles: []
 })
-
+interface SearchParams {
+    name: string,
+    seriesId: number,
+}
 export const ProductListPage = () => {
-    const [modalDataProp, setModalDataProp] = useState<ProductModalData>(() => getEmptyProductModalData())
-    const [productsData, setProductsData] = useState<ResProductCard[]>([])
-    const [seriesData, setSeriesData] = useState<ResSeriesForDetailPage[]>([])
+    const navigate = useNavigate()
+    const [URLSearchParams] = useSearchParams();
+    const [products, setProducts] = useState<ProductListItemData[]>()
+    const [genders, setGenders] = useState<GetOneResponse.Gender[]>()
+    const [series, setSeries] = useState<GetOneResponse.Series[]>()
+    const [searchResult, setSearchResult] = useState<ProductListItemData[]>()
+    const [searchParams, setSearchParams] = useState<SearchParams>({ seriesId: series?.[0].id || 1, name: "" })
     const [toggleToRender, setToggleToRender] = useState(false)
-    const [isModalShow, setIsModalShow] = useState(false)
-    const forcedRender = () => {
+    const [modalDataProp, setModalDataProp] = useState<ProductModalDataProp | undefined>(() => {
+        const createBySeriesId = URLSearchParams.get(CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR)
+        if (createBySeriesId) {
+            if (!checkPositiveInt(createBySeriesId)) {
+                dispatchError("series不正確")
+                return undefined
+            }
+            return getEmptyProductModalData(+createBySeriesId, genders?.[0].id)
+        }
+        return undefined
+    })
+    const renderToGetNewData = () => {
         setToggleToRender(!toggleToRender)
     }
     const closeModal = () => {
-        setModalDataProp(getEmptyProductModalData())
-        setIsModalShow(false)
+        setModalDataProp(undefined)
     }
     const handleCreate = () => {
-        setModalDataProp(getEmptyProductModalData())
-        setIsModalShow(true)
+        setModalDataProp(getEmptyProductModalData(series?.[0].id, genders?.[0].id))
     }
-    const handleEdit = (productModalData: ProductModalData) => {
+    const handleEdit = (productModalData: ProductModalDataProp) => {
         setModalDataProp(productModalData)
-        setIsModalShow(true)
     }
-    const getProductsAndSeriesOnProductPage = async () => {
-        const getSeries = await getSeriesDataForCreateProductApi()
-        const getProducts = await getProductsForProductPageApi()
-        if (getProducts.error || getSeries.error || !getProducts.result || !getSeries.result) {
-            return
+    const getProducts = async () => {
+        const get = await getProductListDataApi()
+        if (get?.isSuccess) {
+            setProducts(get.data)
+            setSearchResult([...get.data])
         }
-        setProductsData(getProducts.result)
-        setSeriesData(getSeries.result)
     }
-    const handleToggle = () => {
-        setToggleToRender(!toggleToRender)
-    }
-    const renderModal = () => {
-        if (!isModalShow) {
-            return null
+    const getSeries = async () => {
+        const get = await getAllApi<GetOneResponse.Series[]>(EntityName.Series)
+        if (get?.isSuccess) {
+            setSeries(get.data)
         }
-        return <ModalContainer
-            closeFn={closeModal}
-            isOpen={true}>
-            <Stack spacing={2}>
-                <ProductModal
-                    modalDataProp={modalDataProp}
-                    seriesData={seriesData}
-                    closeModal={closeModal}
-                    toggle={handleToggle}
-                />
-            </Stack>
-        </ModalContainer>
     }
-    useEffect(() => {
-        getProductsAndSeriesOnProductPage()
-    }, [toggleToRender])
-    const handleDelete = (id: number) => {
-        //TODO
+    const getGenders = async () => {
+        const get = await getAllApi<GetOneResponse.Gender[]>(EntityName.Gender)
+        if (get?.isSuccess) {
+            setGenders(get.data)
+        }
+    }
+    const handleDelete = async (id: number) => {
+        if (confirm("確定刪除嗎")) {
+            const execute = await deleteOneByIdApi(EntityName.Product, id)
+            if (execute?.isSuccess) {
+                renderToGetNewData()
+            }
+        }
     }
     const handleSelect = (id: number) => {
-        //TODO
+        navigate(`/product/${id}`)
+    }
+    const handleChangeSearchParams = (val: string, key: keyof typeof searchParams) => {
+        if (key === "seriesId") {
+            setSearchParams({ ...searchParams, seriesId: Number(val) })
+        } else {
+            setSearchParams({ ...searchParams, name: val })
+        }
+    }
+    const handleSearchProduct = () => {
+        const result = products?.filter(p => {
+            return p.seriesId === searchParams.seriesId && p.name.includes(searchParams.name)
+        })
+        setSearchResult(result || [])
+    }
+    const handleCleanSearch = () => {
+        setSearchResult(products ? [...products] : [])
+    }
+    useEffect(() => {
+        getProducts()
+    }, [toggleToRender])
+    useEffect(() => {
+        getSeries()
+        getGenders()
+    }, [])
+    if (!series || !genders || !products) {
+        return null
     }
     return (
         <>
-            {
-                renderModal()
-            }
-            <Container>
-                <Grid container spacing={2}>
-                    <Grid item xs={2}>
-                        <Button sx={{ height: '100%' }} variant="contained" fullWidth onClick={() => handleCreate()}>新增產品</Button>
-                    </Grid>
-                    <Grid item xs={10}  >
-                    </Grid>
-                    {productsData.map(p => (
-                        <Grid key={p.id} item lg={2} md={3} sm={6} xs={12}>
-                            <ProductCard
-                                key={p.id}
-                                productCardData={p}
-                                handleDelete={handleDelete}
-                                handleSelect={handleSelect}
-                                handleEdit={handleEdit}
+            <ModalContainer
+                closeFn={closeModal}
+                isOpen={modalDataProp !== undefined}>
+                <Stack spacing={2}>
+                    <ProductModal
+                        renderToGetNewData={renderToGetNewData}
+                        modalDataProp={modalDataProp as ProductModalDataProp}
+                        series={series || []}
+                        genders={genders || []}
+                        closeModal={closeModal}
+                    />
+                </Stack>
+            </ModalContainer>
+            <Grid container spacing={1}>
+                <Grid item xs md />
+                <Grid item xs={12} md={10}>
+                    <Card sx={{ margin: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", padding: 1, justifyContent: "center" }}>
+                            <TextField
+                                size="small"
+                                sx={{ marginX: 1 }}
+                                label="名稱"
+                                variant="outlined"
+                                value={searchParams.name}
+                                onChange={e => handleChangeSearchParams(e.target.value, "name")}
                             />
-                        </Grid>
-                    ))}
+                            <TextField size="small" sx={{ marginX: 1 }}
+                                select
+                                label="系列"
+                                value={searchParams.seriesId}
+                                onChange={e => handleChangeSearchParams(e.target.value, "seriesId")}
+                            >
+                                {series ? series.map((s) => (
+                                    <MenuItem key={s.id} value={s.id}>
+                                        {s.navigationName}
+                                    </MenuItem>
+                                )) : []}
+                            </TextField>
+                        </Box>
+                        <Box padding={1} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Button size="small" sx={{ marginX: 1 }} variant="contained" onClick={() => handleSearchProduct()}>搜尋產品</Button>
+                            <Button size="small" sx={{ marginX: 1 }} variant="contained" onClick={() => handleCleanSearch()}>清除搜尋</Button>
+                            <Button size="small" sx={{ marginX: 1 }} variant="outlined" onClick={() => handleCreate()}>新增產品</Button>
+                        </Box>
+                    </Card>
                 </Grid>
-            </Container>
+
+            </Grid>
+            {
+                searchResult?.map(p =>
+                    <Box key={p.id}>
+                        <ProductListItem
+                            handleDelete={handleDelete}
+                            handleSelect={handleSelect}
+                            handleEdit={handleEdit}
+                            productListItemData={p}
+                        />
+                    </Box>
+                )
+            }
         </>
     )
 }

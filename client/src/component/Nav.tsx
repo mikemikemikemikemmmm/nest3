@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Link, NavLink, useLoaderData, useParams } from 'react-router-dom'
-import { NavData, getNavRouteByProductIdApi } from '../api/get'
-import { RootState } from '../store'
-import { NAV_HEIGHT } from '../style/const'
-export const Nav = () => {
-    const allNavData = useSelector((state: RootState) => state.navSlice.allNavData)
-    const loaderData = useLoaderData() as { navRoute: string | undefined }
+import { Link, NavLink, useLoaderData, useLocation, useParams } from 'react-router-dom'
+import { NavigationData } from '../api/get'
+import { useEffect, useState } from 'react';
+
+export const MenuNavigation = (props: { navigationData: NavigationData[]}) => {
+    const location = useLocation();
+    const [menuRoute, setMenuRoute] = useState();
+
+    useEffect(() => {
+        // execute on location change
+        console.log('Location changed!', location); //TODO
+    }, [location]);
     return (
-        <nav className="w-full flex items-end h-24 mb-4" data-testid='navComponent'>
+        <nav className="w-full flex items-end h-24 mb-4" >
             <Link to={'/'} style={{ fontSize: 48 }}>
                 lativ
             </Link>
             <div className='pb-4 ml-24 text-lg'>
-                {allNavData
+                {props.navigationData
                     .filter(nav => {
                         if (nav.children.length === 0) {
                             return false
@@ -23,9 +26,18 @@ export const Nav = () => {
                         }
                         return true
                     })
-                    .map(nav => (
-                        <NavLink data-testid='navComponent-linkBtn' style={{ backgroundColor: loaderData?.navRoute === nav.route ? '#F0EDE5' : 'white' }} key={nav.id} className={`inline-block w-32 text-center py-1 hover:bg-amber-300 hover:text-slate-800`} to={`/${nav.route}`}>
-                            {nav.name}
+                    .map(menu => (
+                        <NavLink
+                            // style={{ backgroundColor: loaderData?.navRoute === nav.route ? '#F0EDE5' : 'white' }} key={nav.id}
+                            className={({ isActive }) =>
+                                `inline-block w-32 text-center py-1 hover:bg-amber-300 hover:text-slate-800
+                                ${(isActive)?"bg-slate-500":""}
+                                `
+                            }
+                            key={menu.id}
+                            to={`/${menu.route}`}
+                        >
+                            {menu.name}
                         </NavLink>))}
             </div>
         </nav>

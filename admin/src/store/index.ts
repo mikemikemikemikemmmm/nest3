@@ -1,36 +1,29 @@
 import { configureStore, createSlice, Dispatch } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 type AlertSeverity = 'error' | 'warning' | 'info' | 'success'
-export interface IAlertItem { severity: AlertSeverity, text: string, id?: number }
+export interface AlertItem { severity: AlertSeverity, text: string, id?: number }
 export interface IState {
     isLoading: boolean
-    isShowModal: boolean
-    alertList: IAlertItem[]
+    alertList: AlertItem[]
 }
 
 const initialState: IState = {
     isLoading: false,
-    alertList: [],
-    isShowModal:false
+    alertList: []
 }
 
 export const appSlice = createSlice({
     name: 'appSlice',
     initialState,
     reducers: {
-        setIsShowModal: (state, action: PayloadAction<boolean>) => {
-            if (state.isShowModal === action.payload) {
-                return
-            }
-            state.isShowModal = action.payload
-        },
         setIsLoading: (state, action: PayloadAction<boolean>) => {
             if (state.isLoading === action.payload) {
                 return
             }
             state.isLoading = action.payload
         },
-        _pustAlertListSingleItem: (state, action: PayloadAction<IAlertItem>) => {
+        //private
+        pustAlertListSingleItem: (state, action: PayloadAction<AlertItem>) => {
             state.alertList = [...state.alertList, action.payload]
         },
         shiftAlertListItem: (state) => {
@@ -50,8 +43,11 @@ export const appSlice = createSlice({
         }
     },
 })
-
-export const { setIsShowModal,setIsLoading, _pustAlertListSingleItem, shiftAlertListItem, deleteAlertListItemById } = appSlice.actions
+const { pustAlertListSingleItem } = appSlice.actions
+export const {
+    setIsLoading,
+    shiftAlertListItem,
+    deleteAlertListItemById } = appSlice.actions
 export default appSlice.reducer
 
 export const store = configureStore({
@@ -66,19 +62,18 @@ export type AppDispatch = typeof store.dispatch
  * ---------------------------------------------------------------------------
  */
 //methods
-export const pushAlertItem = (alertData: IAlertItem) => {
-    const _store = store
-    const { dispatch } = _store
-    const state = _store.getState()
+export const pushAlertItem = (alertItem: AlertItem) => {
+    const { dispatch } = store
+    const state = store.getState()
     const { alertList } = state.appSlice
     if (alertList.length >= 6) {
         dispatch(shiftAlertListItem())
     }
-    let _alertData = { ...alertData, id: performance.now() }
-    dispatch(_pustAlertListSingleItem(_alertData))
+    const alertData = { ...alertItem, id: Math.random()}
+    dispatch(pustAlertListSingleItem(alertData))
     setTimeout(() => {
-        dispatch(deleteAlertListItemById(_alertData.id as number))
-    }, 7000)
+        dispatch(deleteAlertListItemById(alertData.id))
+    }, 3000)
 }
 /**
  * ---------------------------------------------------------------------------

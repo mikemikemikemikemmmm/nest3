@@ -29,36 +29,34 @@ export default function DrawerAside() {
         navigate(toPath)
     }
     return (
-        <div>
-            <span>
-                <React.Fragment key={'left'}>
-                    <IconButton color="primary" onClick={toggleDrawer(true)} aria-label="add to shopping cart">
-                        <MenuIcon />
-                    </IconButton>
-                    <Drawer
-                        anchor={'left'}
-                        open={isShow}
-                        onClose={toggleDrawer(false)}
-                    >
-                        <Box
-                            // sx={{ width: 200 }}
-                            role="presentation"
-                            onClick={toggleDrawer(false)}
-                            onKeyDown={toggleDrawer(false)}
-                        >
-                            <List>
-                                {childrenRoute.map(route => (
-                                    <ListItem key={route.path} disablePadding>
-                                        <ListItemButton onClick={() => handleClickRoute(route.path || "")}>
-                                            <ListItemText sx={{ textAlign: 'center' }} primary={route.name} />
-                                        </ListItemButton>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Box>
-                    </Drawer>
-                </React.Fragment>
-            </span >
-        </div>
+        <React.Fragment key={'left'}>
+            <IconButton color="primary" onClick={toggleDrawer(true)} aria-label="add to shopping cart">
+                <MenuIcon />
+            </IconButton>
+            <Drawer
+                anchor={'left'}
+                open={isShow}
+                onClose={toggleDrawer(false)}
+            >
+                <Box
+                    // sx={{ width: 200 }}
+                    role="presentation"
+                    onClick={toggleDrawer(false)}
+                    onKeyDown={toggleDrawer(false)}
+                >
+                    <List>
+                        {childrenRoute.map(route => (
+                            route.showOnDrawer === false ?
+                            null:
+                            <ListItem key={route.path} disablePadding>
+                                <ListItemButton onClick={() => handleClickRoute(route.path || "")}>
+                                    <ListItemText sx={{ textAlign: 'center' }} primary={route.name} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Box>
+            </Drawer>
+        </React.Fragment>
     );
 }

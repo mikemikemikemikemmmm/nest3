@@ -1,24 +1,8 @@
-import axios, { AxiosRequestConfig } from 'axios'
+import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { BASE_URL, ADMIN_API_PREFIX, TOKEN_HEADER } from '../const'
 import { pushAlertItem, setIsLoading, store } from '../store'
-import { dispatchError, getErrorMessenge } from '../utils/errorHandler'
 import { getToken } from '../utils/token'
 import { browserRouter } from '../router'
-// type TErrorRes = {
-//     error: string,
-//     result: undefined
-// }
-// type TSelectRes<T> = {
-//     result: T
-//     error: undefined
-// } | TErrorRes
-// type TInsertRes = {
-//     result: unknown[]
-//     error: undefined
-// } | TErrorRes
-// type TDeleteRes = TInsertRes
-// type TUpdateRes = TInsertRes
-
 export const baseApi = axios.create({
     baseURL: BASE_URL,
 })
@@ -30,149 +14,99 @@ baseApi.interceptors.request.use((config) => {
 })
 baseApi.interceptors.response.use((response) => {
     return response
-}, function (error) {
-    if (error.response) {
-        if (error.response.status === 401) {
-            browserRouter.navigate('/')
-        }
-        return error.response
+}, function (error) {  // when code is larger than 200
+    if (error.response?.status === 401) {
+        browserRouter.navigate('/')
     }
+    const errorMessage =
+        error?.response?.data?.errorMessage || error?.message
+    return Promise.reject({ message: errorMessage })
 })
-export const getBaseApi = async <ResponseType>(url: string) => {
-    const { dispatch } = store
-    dispatch(setIsLoading(true))
-    const response = await baseApi.get(`/${ADMIN_API_PREFIX}/${url}`)
-    const { data } = response
-    dispatch(setIsLoading(false))
-    if (data.error) {
-        pushAlertItem({ severity: 'error', text: data.error })
-        return { error: data.error }
-    }
-    pushAlertItem({ severity: 'success', text: `取得資料成功` })
-    return { result: data.result as ResponseType }
+
+
+
+
+
+type ResponseType<T = any> = {
+    data: T,
+    isSuccess: true
+} | {
+    isSuccess: false,
+    errorMessage: string
 }
-export const postBaseApi = async <CreateDto>(url: string, createDto: CreateDto) => {
-    const { dispatch } = store
-    dispatch(setIsLoading(true))
-    const response = await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, createDto)
-    const { data } = response
-    dispatch(setIsLoading(false))
-    if (data.error) {
-        pushAlertItem({ severity: 'error', text: data.error })
-        return { error: data.error }
+const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>, successText: string) => {
+    if (resonse.data.isSuccess) {
+        pushAlertItem({ severity: 'success', text: successText })
+        return resonse.data as ResponseType<T>
+    } else {
+        throw Error(resonse.data.errorMessage)
     }
-    pushAlertItem({ severity: 'success', text: `新增資料成功` })
-    return { result: data.result as ResponseType }
 }
-export const patchBaseApi = async <UpdateDto>(url: string, updateDto: UpdateDto) => {
+const handleCatch = (error: Error): ResponseType  => {
+    pushAlertItem({
+        severity: 'error',
+        text: error.message || "發生錯誤"
+    })
+    return {
+        isSuccess: false,
+        errorMessage: error.message
+    }
+}
+export const getBaseApi = async <GetData>(
+    url: string,
+    queryParams?: { [key: string]: string }) => {
     const { dispatch } = store
     dispatch(setIsLoading(true))
-    const response = await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, updateDto)
-    const { data } = response
-    dispatch(setIsLoading(false))
-    if (data.error) {
-        pushAlertItem({ severity: 'error', text: data.error })
-        return { error: data.error }
-    }
-    pushAlertItem({ severity: 'success', text: `修改資料成功` })
-    return { result: data.result as ResponseType }
+    return await baseApi.get(`/${ADMIN_API_PREFIX}/${url}`, { params: queryParams })
+        .then(response => {
+            return handleResponse<GetData>(response, "取得成功")
+        })
+        .catch(error => {
+            return handleCatch(error)
+        })
+        .finally(() => {
+            dispatch(setIsLoading(false))
+        })
+}
+export const postBaseApi = async (url: string, createDto: object) => {
+    const { dispatch } = store
+    dispatch(setIsLoading(true))
+    return await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, createDto)
+        .then(resonse => {
+            return handleResponse(resonse, "新增成功")
+        })
+        .catch(error => {
+            return handleCatch(error)
+        })
+        .finally(() => {
+            dispatch(setIsLoading(false))
+        })
+}
+export const putBaseApi = async (url: string, updateDto: object) => {
+    const { dispatch } = store
+    dispatch(setIsLoading(true))
+    return await baseApi.put(`/${ADMIN_API_PREFIX}/${url}`, updateDto)
+        .then(resonse => {
+            return handleResponse(resonse, "更新成功")
+        })
+        .catch(error => {
+            return handleCatch(error)
+        })
+        .finally(() => {
+            dispatch(setIsLoading(false))
+        })
 }
 export const deleteBaseApi = async (url: string) => {
     const { dispatch } = store
     dispatch(setIsLoading(true))
-    const response = await baseApi.delete(`/${ADMIN_API_PREFIX}/${url}`)
-    const { data } = response
-    dispatch(setIsLoading(false))
-    if (data.error) {
-        pushAlertItem({ severity: 'error', text: data.error })
-        return { error: data.error }
-    }
-    pushAlertItem({ severity: 'success', text: `資料成功` })
-    return { result: data.result as ResponseType }
+    return await baseApi.delete(`/${ADMIN_API_PREFIX}/${url}`)
+        .then(resonse => {
+            return handleResponse(resonse, "刪除成功")
+        })
+        .catch(error => {
+            return handleCatch(error)
+        })
+        .finally(() => {
+            dispatch(setIsLoading(false))
+        })
 }
-// export const getBaseApi = async <DataType>(url: string, confing?: AxiosRequestConfig<any>) => {
-//     const _store = store
-//     const { dispatch } = _store
-//     dispatch(setIsLoading(true))
-//     try {
-//         const res = await baseApi.get<TSelectRes<DataType>>(`/${ADMIN_API_PREFIX}/${url}`, confing)
-//         const data = res.data as TSelectRes<DataType>
-//         if (data.error) {
-//             throw Error(data.error)
-//         } else {
-//             pushAlertItem({ severity: 'success', text: `取得資料成功` })
-//             return { result: data.result, error: undefined }
-//         }
-//     } catch (error) {
-//         pushAlertItem({ severity: 'error', text: getErrorMessenge(error) })
-//         return { result: undefined, error: getErrorMessenge(error) }
-//     }
-//     finally {
-//         dispatch(setIsLoading(false))
-//     }
-// }
-// export const postBaseApi = async<T>(url: string, _data: T, showText: string = "") => {
-//     const { dispatch } = store
-//     dispatch(setIsLoading(true))
-//     try {
-//         const res = await baseApi.post(url, _data)
-//         const data = res.data as TInsertRes
-//         if (data.error) {
-//             throw Error(data.error)
-//         } else {
-//             pushAlertItem({ severity: 'success', text: `${showText}新增成功` })
-//             return {
-//                 result: data.result
-//             }
-//         }
-//     } catch (error) {
-//         pushAlertItem({ severity: 'error', text: getErrorMessenge(error) })
-//         return { result: undefined, error: getErrorMessenge(error) }
-
-//     }
-//     finally {
-//         dispatch(setIsLoading(false))
-//     }
-// }
-// export const deleteBaseApi = async (url: string, showText: string = "") => {
-//     const { dispatch } = store
-//     dispatch(setIsLoading(true))
-//     try {
-//         const res = await baseApi.delete(url)
-//         const data = res.data as TDeleteRes
-//         if (data.error) {
-//             throw new Error(data.error)
-//         } else {
-//             pushAlertItem({ severity: 'success', text: `${showText}刪除資料成功` })
-//             return { result: data.result }
-//         }
-//     } catch (error) {
-//         pushAlertItem({ severity: 'error', text: getErrorMessenge(error) })
-//         return { result: undefined, error: getErrorMessenge(error) }
-
-//     }
-//     finally {
-//         dispatch(setIsLoading(false))
-//     }
-// }
-// export const patchBaseApi = async <T>(url: string, _data: T, showText: string = "") => {
-//     const { dispatch } = store
-//     dispatch(setIsLoading(true))
-//     try {
-//         const res = await baseApi.put(url, _data)
-//         const data = res.data as TUpdateRes
-//         if (data.error) {
-//             throw Error(data.error)
-//         } else {
-//             pushAlertItem({ severity: 'success', text: `修改成功` })
-
-//         }
-//     } catch (error) {
-//         pushAlertItem({ severity: 'error', text: getErrorMessenge(error) })
-//         return { result: undefined, error: getErrorMessenge(error) }
-
-//     }
-//     finally {
-//         dispatch(setIsLoading(false))
-//     }
-// }

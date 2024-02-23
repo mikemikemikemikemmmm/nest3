@@ -1,29 +1,25 @@
 import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { Link, useLoaderData, useNavigate } from 'react-router-dom'
-import { RootState } from '../store'
+import { Link, useLoaderData, useNavigate, useParams } from 'react-router-dom'
 import { ASIDE_WIDTH } from '../style/const'
-export const Aside = () => {
-    const loaderData = useLoaderData() as { navRoute: string }
-    const navigate = useNavigate()
-    const targetNavData = useSelector((state: RootState) => {
-        const { allNavData } = state.navSlice
-        return allNavData.find(nav => nav.route === loaderData.navRoute)
-    })
-    const targetNavRoute = targetNavData?.route
-    useEffect(() => {
-        if (!targetNavRoute) {
-            navigate('/')
-        }
-    }, [targetNavRoute])
-    if (!targetNavData) {
-        return <div></div>
+import { NavigationData } from '../api/get'
+export const AsideComponent = (props: { navigationData: NavigationData[] }) => {
+    const { navRoute } = useParams()
+    if (!navRoute || navRoute === "") {
+        return null
     }
+    const currentNav = props.navigationData.find(n => n.route === navRoute)
+    if (!currentNav || currentNav.children.length === 0) {
+        return null
+    }
+    const asideData = currentNav.children
     return (
-        <aside className=" align-top inline-block list-none text-aside" style={{ width: ASIDE_WIDTH }} data-testid='asideComponent'>
+        <aside
+            className=" align-top inline-block list-none text-aside"
+            style={{ width: ASIDE_WIDTH }}
+        >
             <ul>
                 {
-                    targetNavData.children
+                    asideData
                         .filter(category => category.children.length > 0)
                         .map(category => <ul key={category.id}>
                             <li>
@@ -35,7 +31,7 @@ export const Aside = () => {
                                             className="my-2  hover:underline hover:text-asideHover">
                                             <Link
                                                 key={subcategory.id}
-                                                to={`/${targetNavData.route}/${category.route}/${subcategory.route}`}>
+                                                to={`/${currentNav.route}/${category.route}/${subcategory.route}`}>
                                                 {`  > ${subcategory.name}`}
                                             </Link>
                                         </li>)}
@@ -43,7 +39,7 @@ export const Aside = () => {
                             </li>
                         </ul>)
                 }
-            </ul>
+            </ul> 
         </aside>
     )
 }

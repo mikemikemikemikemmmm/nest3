@@ -2,6 +2,7 @@
 import Alert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { RootState } from '../../src/store'
+import { ZIndex } from "@/const";
 export const AlertContainer = () => {
     const alertList = useSelector((state: RootState) => state.appSlice.alertList)
     return <div
@@ -9,7 +10,7 @@ export const AlertContainer = () => {
             position: 'absolute',
             right: 20,
             bottom: 20,
-            zIndex: 9999
+            zIndex:  ZIndex.Alert 
         }}
     >
         {

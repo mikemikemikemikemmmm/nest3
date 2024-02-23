@@ -3,7 +3,7 @@ export const ASIDE_WIDTH = 200
 export const DETAIL_IMG_WIDTH = 100
 export const ERROR_COMPONENT_IMG_WIDTH = 200
 export const APP_WIDTH = 1180
-export const asideStyle = {
+export const ASIDE_STYLE = {
     color: '#4d494a'
 }
 export const CARD_LAYOUT = {

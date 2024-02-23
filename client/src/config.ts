@@ -1,3 +1,5 @@
 export const BASE_URL = import.meta.env.VITE_BASE_URL
-export const serverStaticPrefix = 'static'
-export const detailQuerySpIdString = 'sp_id'
+export const CLIENT_API_PREFIX = import.meta.env.VITE_CLIENT_API_PREFIX
+export const STATIC_FILE_PREFIX = import.meta.env.VITE_STATIC_FILE_PREFIX
+// export const detailQuerySpIdString = 'sp_id'
+export const URL_QUERY_SUBPRODUCT_ID_FOR_DETAIL = "subproductId"

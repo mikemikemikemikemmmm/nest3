@@ -32,11 +32,10 @@ export const LoginPage = () => {
     }, [])
     return (
         <div style={{
-            width: '100vw',
-            height: '100vh',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: "center"
+            justifyContent: "center",
+            height:"100%"
         }}>
             <div style={{ padding: 20 }}>
                 <input type="text" style={{ display: 'block', padding: 10, margin: 10 }} placeholder="名稱" onChange={(e) => setName(e.target.value)} />

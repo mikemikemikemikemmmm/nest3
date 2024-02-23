@@ -1,64 +1,113 @@
 import { useEffect, useState } from "react"
-import { EntityName, deleteOneByIdApi } from "../../api/entity"
-import { FAKE_ID_FOR_CREATE } from "../../const"
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import { CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR, DRAWER_WIDTH, FAKE_ID_FOR_CREATE } from "../../const"
 import { NavigationItem } from "./navigationItem"
-import { Category } from "@mui/icons-material"
 import { ModalContainer } from "../../component/modalContainer"
-import { Stack } from "@mui/material"
-import { NavigationModal, NavigationModalData } from "./modal"
-import { NavigationTreeItem, NavigationTreeItemType, SeriesTreeItem, getNavigationTreeApi, getSeriesTreeBySubCategoryIdApi } from "../../api/page/navigation"
+import { Box, Button, Card, CircularProgress, Divider, Grid, IconButton, Stack } from "@mui/material"
+import { NavigationModal, NavigationModalDataProp } from "./modal"
+import { NavigationTreeItem, SeriesTreeItem, deleteNavigationApi, getNavigationTreeApi, getSeriesTreeBySubCategoryIdApi } from "../../api/page/navigation"
+import { NavigationTreeItemType } from "../../api/entityType"
+import { ProductCard } from "../../component/productCard"
+import { EntityName, deleteOneByIdApi } from "../../api/entity";
+import { useNavigate, useSearchParams } from "react-router-dom";
 const getEmptyModalData = (type: NavigationTreeItemType, parentId: number) => ({
     id: FAKE_ID_FOR_CREATE,
     name: "",
-    order: 0,
+    order: 1,
+    route: "",
     type,
     parentId,
-})
+    parentName: ""
+}) as NavigationModalDataProp
 export const NavigationPage = () => {
-    const [navigationTreeData, setNavigationTreeData] = useState<NavigationTreeItem[] | undefined>(undefined)
-    const [selectedMenu, setSelectedMenu] = useState<NavigationTreeItem | undefined>(undefined)
-    const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | undefined>(undefined)
+    const navigateFn = useNavigate()
+    const [navigationTreeData, setNavigationTreeData] = useState<NavigationTreeItem[]>()
+    const [selectedMenu, setSelectedMenu] = useState<NavigationTreeItem>()
+    const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number>()
     const [seriesTreeData, setSeriesTreeData] = useState<SeriesTreeItem[]>([])
-    const [isModalShow, setIsModalShow] = useState(false)
-    const [modalDataProp, setModalDataProp] = useState<NavigationModalData>(() => getEmptyModalData(EntityName.Menu, FAKE_ID_FOR_CREATE))
+    const [modalDataProp, setModalDataProp] = useState<NavigationModalDataProp | undefined>(undefined)
+    const [toggleToRender, setToggleToRender] = useState(false)
+    const isModalShow = modalDataProp !== undefined
+    const getParentName = (selfType: NavigationTreeItemType, parentId: number) => {
+        if (selfType === "menu") {
+            return ""
+        }
+        else if (selfType === "category") {
+            return selectedMenu?.name || ""
+        }
+        else if (selfType === "subCategory") {
+            const parentCategory = selectedMenu?.children.find(c => c.id === parentId)
+            if (!parentCategory) {
+                return ""
+            }
+            return `${selectedMenu?.name}-${parentCategory?.name}`
+        } else {
+            const categoryList = (selectedMenu as NavigationTreeItem).children
+            let selectedSubcategory = selectedMenu //temp fake
+            const selectedCategory = categoryList.find(c => {
+                selectedSubcategory = c.children.find(sc => sc.id === selectedSubCategoryId) as NavigationTreeItem
+                return !!selectedSubcategory
+            })
+            if (!selectedSubcategory) {
+                return `${selectedMenu?.name}-${selectedCategory?.name}`
+            }
+            return `${selectedMenu?.name}-${selectedCategory?.name}-${selectedSubcategory?.name}`
+
+        }
+    }
     const handleEdit = (treeItem: NavigationTreeItem) => {
-        setModalDataProp(treeItem)
-        setIsModalShow(true)
+        setModalDataProp({
+            ...treeItem,
+            parentName: getParentName(treeItem.type, treeItem.parentId)
+        })
     }
     const handleCreate = (type: NavigationTreeItemType, parentId: number) => {
-        setModalDataProp(getEmptyModalData(type, parentId))
-        setIsModalShow(true)
+        setModalDataProp({
+            ...getEmptyModalData(type, parentId),
+            parentName: getParentName(type, parentId)
+        })
+    }
+    const renderToGetData = () => {
+        setToggleToRender(!toggleToRender)
+    }
+    const closeModal = () => {
+        setModalDataProp(undefined)
     }
     const handleDelete = async (id: number, type: NavigationTreeItemType) => {
         if (confirm('確定刪除嗎')) {
-            const executeDelete = await deleteOneByIdApi(type, id)
-            if (!executeDelete.error) {
-                // forcedRender() TODO
+            const targetApi = (() => {
+                if (type === "series") {
+                    return deleteOneByIdApi(EntityName.Series, id)
+                }
+                return deleteNavigationApi(type, id)
+            })()
+            const executeDelete = await targetApi
+            if (executeDelete?.isSuccess) {
+                renderToGetData()
             }
         }
     }
-    const closeModal = () => {
-        setModalDataProp(getEmptyModalData(EntityName.Menu, FAKE_ID_FOR_CREATE))
-        setIsModalShow(false)
-    }
-    const handleSelect = (type: NavigationTreeItemType, dataRef: NavigationTreeItem) => {
+    const handleSelect = (type: NavigationTreeItemType, item: NavigationTreeItem) => {
         switch (type) {
-            case EntityName.Menu:
-                setSelectedMenu(dataRef)
+            case "menu":
+                setSelectedMenu(item)
+                setSelectedSubCategoryId(undefined)
                 break;
-            case EntityName.SubCategory:
-                setSelectedSubCategoryId(dataRef.id)
+            case "subCategory":
+                setSelectedSubCategoryId(item.id)
                 break;
         }
     }
     const renderModal = () => {
-        if (isModalShow) {
+        if (!isModalShow) {
             return null
         }
         return (
             <ModalContainer closeFn={closeModal} isOpen={true}>
                 <Stack spacing={2}>
                     <NavigationModal
+                        renderToGetData={renderToGetData}
                         modalDataProp={modalDataProp}
                         closeModal={closeModal}
                     />
@@ -69,27 +118,57 @@ export const NavigationPage = () => {
         if (selectedSubCategoryId === undefined) {
             return
         }
-        const { result } = await getSeriesTreeBySubCategoryIdApi(selectedSubCategoryId)
-        if (result) {
-            setSeriesTreeData(result)
+        const response = await getSeriesTreeBySubCategoryIdApi(selectedSubCategoryId)
+        if (response?.isSuccess) {
+            setSeriesTreeData(response?.data)
         }
     }
     const getNavigationTree = async () => {
-        const { result } = await getNavigationTreeApi()
-        if (result) {
-            setNavigationTreeData(result)
+        const response = await getNavigationTreeApi()
+        if (response?.isSuccess) {
+            setNavigationTreeData(response?.data)
+            if (selectedMenu) {
+                const selectedMenuInNewData =
+                    response?.data.find(data => data.id === selectedMenu.id)
+                if (selectedMenuInNewData) {
+                    setSelectedMenu(selectedMenuInNewData)
+                }
+            }
         }
     }
+    const handleCreateProductAtSereis = (seriesId: number) => { //TODO
+        navigateFn(`/productList/?${CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR}=${seriesId}`)
+    }
     useEffect(() => {
-        getSeriesTree()
+        setSelectedSubCategoryId(undefined)
+        setSeriesTreeData([])
+    }, [selectedMenu])
+    useEffect(() => {
+        if (selectedSubCategoryId) {
+            getSeriesTree()
+        }
     }, [selectedSubCategoryId])
     useEffect(() => {
+        getSeriesTree()
         getNavigationTree()
-    }, [])
-    return <section>
+    }, [toggleToRender])
+    if (!navigationTreeData) {
+        return null
+    }
+    return <>
         {renderModal()}
-        <div>
-            <button onClick={() => handleCreate(EntityName.Menu, FAKE_ID_FOR_CREATE)}></button>
+        <Stack
+            direction="row"
+            spacing={1}
+            margin={1}
+        >
+            <Button
+                variant="outlined"
+                sx={{ backgroundColor: "white" }}
+                size="small"
+                onClick={() => handleCreate("menu", FAKE_ID_FOR_CREATE)}>
+                新增大種類
+            </Button>
             {
                 navigationTreeData?.map(menu =>
                     <NavigationItem
@@ -100,45 +179,90 @@ export const NavigationPage = () => {
                         handleEdit={handleEdit} />
                 )
             }
-        </div>
-        <div>
-            <aside>
-                <button onClick={() => handleCreate(EntityName.Category, FAKE_ID_FOR_CREATE)}>
-                    新增種類
-                </button>
+        </Stack>
+        <Divider sx={{ margin: 1 }} />
+        <Box display={"flex"}>
+            <Stack spacing={0.5} sx={{  minWidth: DRAWER_WIDTH, margin: 1 }}>
                 {
-                    selectedMenu?.children.map(category =>
-                        <>
-                            <div>
-                                <NavigationItem
-                                    key={category.id}
-                                    data={category}
-                                    handleSelect={handleSelect}
-                                    handleDelete={handleDelete}
-                                    handleEdit={handleEdit} />
-                            </div>
-                            <button onClick={() => handleCreate(EntityName.SubCategory, FAKE_ID_FOR_CREATE)}>
-                                新增副種類
-                            </button>
-                            {
-                                category.children.map(subCategory =>
+                    selectedMenu &&
+                    <>
+                        <Button
+                            variant="outlined"
+                            sx={{ backgroundColor: "white" }}
+                            onClick={() => handleCreate("category", selectedMenu.id)}>
+                            新增種類
+                        </Button>
+                        {
+                            selectedMenu?.children.map(category =>
+                                <Box key={category.id}>
                                     <NavigationItem
-                                        key={subCategory.id}
-                                        data={subCategory}
+                                        data={category}
                                         handleSelect={handleSelect}
                                         handleDelete={handleDelete}
-                                        handleEdit={handleEdit} />)
-                            }
-                        </>
-                    )
+                                        handleEdit={handleEdit} />
+                                    <Stack spacing={0.5} margin={0.5} sx={{ paddingLeft: 3 }}>
+                                        <Button
+                                            variant="outlined"
+                                            sx={{ backgroundColor: "white" }}
+                                            onClick={() => handleCreate("subCategory", category.id)}>
+                                            新增副種類
+                                        </Button>
+                                        {
+                                            category.children.map(subCategory =>
+                                                <NavigationItem
+                                                    key={subCategory.id}
+                                                    data={subCategory}
+                                                    handleSelect={handleSelect}
+                                                    handleDelete={handleDelete}
+                                                    handleEdit={handleEdit} />)
+                                        }
+                                    </Stack>
+                                </Box>
+                            )
+                        }
+                    </>
                 }
-
-            </aside>
-            <div>
-                {seriesTreeData.map(series => <div key={series.id}>
-                    {series.name}
-                </div>)}
-            </div>
-        </div>
-    </section>
+            </Stack>
+            <Divider orientation="vertical" variant="middle" flexItem />
+            <Stack spacing={0.5} sx={{ margin: 1, flexGrow: 1 }}>
+                {selectedSubCategoryId &&
+                    <Button
+                        variant="outlined"
+                        sx={{ backgroundColor: "white" }}
+                        onClick={() => handleCreate("series", selectedSubCategoryId)}>
+                        新增系列
+                    </Button>
+                }
+                {seriesTreeData?.map(series =>
+                    <Grid container key={series.id} spacing={0.5}>
+                        <Grid item xs={12}>
+                            {series.name}
+                            <IconButton
+                                onClick={() => handleEdit({
+                                    ...series,
+                                    children: [],
+                                    route: "",
+                                    parentId: (selectedSubCategoryId as number),
+                                    type: "series"
+                                })} aria-label="edit" size="small">
+                                <EditOutlinedIcon fontSize="inherit" />
+                            </IconButton>
+                            <IconButton
+                                onClick={() => handleDelete(series.id, "series")}
+                                aria-label="delete"
+                                size="small" >
+                                <DeleteForeverOutlinedIcon fontSize="inherit" />
+                            </IconButton>
+                            <Button onClick={() => handleCreateProductAtSereis(series.id)} variant="outlined">在此系列中新增產品</Button>
+                        </Grid>
+                        {series.products.map(p =>
+                            <Grid item key={p.id} xs={2}>
+                                <ProductCard key={p.id} productCardData={p} />
+                            </Grid>
+                        )}
+                    </Grid>
+                )}
+            </Stack>
+        </Box>
+    </>
 }

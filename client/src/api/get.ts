@@ -1,88 +1,83 @@
-import { baseApi } from "./base"
-import { AxiosResponse } from 'axios'
-import { BASE_URL, serverStaticPrefix } from "../config"
-type GetRes<T> = [AxiosResponse<{ result: T }>, undefined] | [undefined, Error]
-const getApi = async <T>(url: string): Promise<GetRes<T>> => {
-    try {
-        const result = await baseApi.get<{ result?: T, error?: string }>(`getClientController/${url}`)
-        if (result.data.error || !result.data.result) {
-            throw Error(result.data.error)
-        }
-        return [result as AxiosResponse<{ result: T }>, undefined]
-    } catch (error) {
-        return [undefined, error as Error]
+import { baseApi, ResponseType } from "./base"
+import { CLIENT_API_PREFIX } from "../config"
+import { AxiosResponse } from "axios"
+const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>) => {
+    if (resonse.data.isSuccess) {
+        return resonse.data as ResponseType<T>
+    } else {
+        throw Error(resonse.data.errorMessage)
     }
 }
 
-///nav component
-export interface NavData {
+const handleCatch = (error: Error): ResponseType => {
+    return {
+        isSuccess: false,
+        errorMessage: error.message || "發生錯誤"
+    }
+}
+
+export const getBaseApi = async <GetData>(url: string, queryParams?: { [key: string]: string }) => {
+    return await baseApi.get(`/${CLIENT_API_PREFIX}/${url}`, { params: queryParams })
+        .then(response => {
+            return handleResponse<GetData>(response)
+        })
+        .catch(error => {
+            return handleCatch(error)
+        })
+}
+
+
+type NavigationType = "menu" | "category" | "subCategory"
+export interface NavigationData {
     id: number,
     name: string,
     route: string
-    children: {
-        id: number,
-        nav_id: number,
-        name: string,
-        route: string
-        children: {
-            category_id: number,
-            id: number,
-            name: string,
-            route: string
-            children: {
-                sub_category_id: number,
-                id: number,
-                name: string,
-            }[]
-        }[]
-    }[]
+    type: NavigationType,
+    children: NavigationData[]
 }
-export const getAllNavApi = () => getApi<NavData[]>('getAllNavApi')
-export const getNavRouteByProductIdApi = (productId: number) => getApi<string>(`getNavRouteOnDetailPageApi/${productId}`)
-
-
-///nav index page
-export interface ProductCardData {
-    name: string,
+export const getAllNavApi = () => getBaseApi<NavigationData[]>('navigation')
+export interface ProductCard {
     id: number,
+    name: string,
     subproducts: {
-        price: number,
+        colorId: number,
         id: number,
-        color_id: number,
-        color_name: string
+        colorName: string,
+        price: number
     }[]
 }
-export const getProductCardDataOnNavIndexApi = (navRoute: string) => getApi<ProductCardData[]>(`getProductCardDataOnNavIndexApi/${navRoute}`)
-
-///product list page
 export interface SeriesData {
     id: number,
     name: string,
-    products: ProductCardData[]
+    productCards: ProductCard[]
 }
-export const getSeriesDataByRouteApi = (navRoute: string, categoryRoute: string, subcategoryRoute: string) => getApi<SeriesData[]>(`getSeriesDataByRouteApi/${navRoute}/${categoryRoute}/${subcategoryRoute}`)
-
-/// product detail page
-export interface ProductDetailData {
-    name: string,
+export const getSeriesDataApi = (menuRoute: string, categoryRoute: string = "", subcategoryRoute: string = "") => {
+    const queryParams = { menuRoute } as { [key: string]: string }
+    if (categoryRoute !== "") {
+        queryParams.categoryRoute = categoryRoute
+    }
+    if (subcategoryRoute !== "") {
+        queryParams.subcategoryRoute = subcategoryRoute
+    }
+    return getBaseApi("series", queryParams)
+}
+export interface SizeData {
     id: number,
-    series_id: number,
-    nav_route: string,
-    subproducts: {
-        id: number,
-        price: number,
-        color_id: number,
-        product_id: number,
-        color_name: string,
-        size_l: number,
-        size_m: number,
-        size_s: number
-    }[]
+    name: string
 }
-export const getProductDetailByProductIdApi = (productId: number) => getApi<[ProductDetailData]>(`getProductDetailByProductIdApi/${productId}`)
-
-//img 
-export const getProductCardImgUrlApi = (subproductId: number) => `${BASE_URL}/${serverStaticPrefix}/subProducts/${subproductId}.jpg`
-export const getSubproductImgUrlInDetailPageApi = (subproductId: number) => `${BASE_URL}/${serverStaticPrefix}/subProducts/${subproductId}.jpg`
-export const getNavBannerImgUrlApi = (navRoute: string) => `${BASE_URL}/${serverStaticPrefix}/nav/${navRoute}.jpg`
-export const getColorImgUrlApi = (colorId: number) => `${BASE_URL}/${serverStaticPrefix}/colors/${colorId}.jpg`
+export interface SubproductData {
+    id: number,
+    price: number,
+    colorId: number,
+    colorName: string,
+    sizes: SizeData[]
+}
+export interface ProductDetailData {
+    id: number,
+    name: string,
+    genderId: number,
+    genderName: string,
+    subproducts: SubproductData[]
+}
+export const getProductDetailByProductIdApi = (productId: number) =>
+    getBaseApi<ProductDetailData>(`productDetail/${productId}`)

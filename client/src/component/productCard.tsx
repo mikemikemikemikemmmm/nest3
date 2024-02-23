@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, createElement } from "react"
 import { Link } from "react-router-dom"
-import { getColorImgUrlApi, getProductCardImgUrlApi, ProductCardData } from "../api/get"
-import { detailQuerySpIdString } from "../config"
 import { CARD_LAYOUT } from "../style/const"
-
-export const ProductCard = (props: ProductCardData) => {
+import { getColorImgUrlApi, getProductCardImgUrlApi } from "../api/staticFile"
+import { ProductCard } from "../api/get"
+import { URL_QUERY_SUBPRODUCT_ID_FOR_DETAIL } from "../config"
+export const ProductCardComponent = (props: ProductCard) => {
     const [status, setStatus] = useState<'error' | 'done'>('error')
     const firstSubproduct = props.subproducts[0]
     const imgUrl = getProductCardImgUrlApi(firstSubproduct?.id)
@@ -23,8 +23,8 @@ export const ProductCard = (props: ProductCardData) => {
             <div className="flex justify-center my-2">
                 {
                     props.subproducts.map(sp => (
-                        <Link data-testid='productCard-colorBtn' className="w-4 h-4 mx-1 inline-block border border-gray" style={{ zIndex: 200 }} to={`/detail/${props.id}?${detailQuerySpIdString}=${sp.id}`} key={sp.id}>
-                            <img className="w-full h-full" src={getColorImgUrlApi(sp.color_id)} alt={sp.color_name} />
+                        <Link data-testid='productCard-colorBtn' className="w-4 h-4 mx-1 inline-block border border-gray" style={{ zIndex: 200 }} to={`/detail/${props.id}?${URL_QUERY_SUBPRODUCT_ID_FOR_DETAIL}=${sp.id}`} key={sp.id}>
+                            <img className="w-full h-full" src={getColorImgUrlApi(sp.colorId)} alt={sp.colorName} />
                         </Link>
                     ))
                 }

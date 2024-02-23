@@ -1,73 +1,83 @@
 
-import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter, RouteObject, RouterProvider } from 'react-router-dom'
 import { DetailPage } from './page/detail'
-import { getProductCardDataOnNavIndexApi, getProductDetailByProductIdApi, getSeriesDataByRouteApi, SeriesData } from './api/get'
+import { getAllNavApi,  getProductDetailByProductIdApi, getSeriesDataApi, SeriesData } from './api/get'
 import { ProductListPage } from './page/list'
-import { NavIndexPage } from './page/navIndex'
 import { ErrorComponent } from './component/errorComponent'
 import { errorHandler } from './errorHandler'
 import { IndexPage } from './page'
-import { store } from './store'
-export const router = createHashRouter([
+import App from './App'
+import { ErrorPage } from './page/error'
+
+export const childrenRoute: RouteObject[] = [
     {
-        element: <ErrorComponent />,
-        path: "error",
-    },
-    {
-        // errorElement: <ErrorComponent />,
         element: <IndexPage />,
-        path: "",
-        loader: async ({ request, params }) => {
-            return { navRoute: null }
-        }
+        path: ""
     },
     {
-        errorElement: <ErrorComponent />,
+        errorElement: <ErrorPage />,
         element: <DetailPage />,
         path: "detail/:productId",
-        loader: async ({ request, params }) => {
+        loader: async ({ params }) => {
             const productId = Number(params.productId)
-            const [result, error] = await getProductDetailByProductIdApi(productId)
-            if (error) {
-                return errorHandler(error)
+            if (!Number.isInteger(productId) || productId <= 0) {
+                throw Error
             }
-            const data = result.data.result[0]
-            return { data, navRoute: data.nav_route }
+            const result = await getProductDetailByProductIdApi(productId)
+            if (!result.isSuccess) {
+                return errorHandler(result.errorMessage)
+            }
+            return { productDetailData: result.data,menuRoute:result.data.menuRoute }
         }
     },
     {
         errorElement: <ErrorComponent />,
         element: <ProductListPage />,
         path: ":navRoute/:categoryRoute/:subcategoryRoute",
-        loader: async ({ request, params }) => {
+        loader: async ({ params }) => {
             const { navRoute, categoryRoute, subcategoryRoute } = params
-            if (typeof navRoute !== 'string' || typeof categoryRoute !== "string" || typeof subcategoryRoute !== 'string') {
-                return errorHandler('error')
+            if(!navRoute){
+                throw Error
             }
-            const [result, error] = await getSeriesDataByRouteApi(navRoute, categoryRoute, subcategoryRoute)
-            if (error) {
-                return errorHandler(error)
-
+            const result = await getSeriesDataApi(navRoute, categoryRoute, subcategoryRoute)
+            if (!result.isSuccess) {
+                return errorHandler(result.errorMessage)
             }
-            return { data: result.data.result, navRoute }
+            return { seriesDatas: result.data }
 
         }
     },
     {
-        errorElement: <ErrorComponent />,
-        element: <NavIndexPage />,
+        element: <ProductListPage />,
         path: ":navRoute",
-        loader: async ({ request, params }) => {
+        loader: async ({ params ,}) => {
             const { navRoute } = params
-            if (typeof navRoute !== 'string') {
-                return errorHandler('error')
+            if(!navRoute){
+                return { seriesDatas: undefined }
             }
-            const [result, error] = await getProductCardDataOnNavIndexApi(navRoute as string)
-            if (error) {
-                return errorHandler(error)
+            const result = await getSeriesDataApi(navRoute)
+            if (!result.isSuccess) {
+                return { seriesDatas: undefined }
             }
-            return { data: result.data.result, navRoute }
+            return { seriesDatas: result.data }
+
         }
     },
+]
 
+export const browserRouter = createBrowserRouter([
+    {
+        path: "/",
+        element: <App />,
+        children: childrenRoute,
+        errorElement: <ErrorPage />,
+        loader: async () => {
+            const result = await getAllNavApi()
+            if (result.isSuccess) {
+                return { navigationData: result.data }
+            } else {
+                throw Error
+            }
+        },
+    },
 ]);

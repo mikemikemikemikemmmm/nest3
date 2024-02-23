@@ -1,21 +1,23 @@
 import { Card } from "@mui/material"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { getImgUrlBySubProductIdApi } from "../api/staticFile"
-import { handleImgError } from "../utils/imgError"
-import errorImgUrl from '../assets/imgError.jpg'
+import { getImgUrlBySubProductIdApi } from "@/api/staticFile"
+import { handleImgError } from "@/utils/imgError"
+import errorImgUrl from '@/assets/imgError.jpg'
+import { GetOneResponse } from "@/api/entityType"
 
 
-export const ProductCard = (props: { id: number, text: string, firstSubProductId: number | null }) => {
-    const { id, text, firstSubProductId } = props
+export const ProductCard = (props: { productCardData: GetOneResponse.ProductCard }) => {
+    const { productCardData } = props
+    const { id, name, subproductId } = productCardData
     const [imgUrl, setImgUrl] = useState<'loading' | 'error' | string>('loading')
     const getProductImgUrl = () => {
-        if (firstSubProductId === null) {
+        if (subproductId === null) {
             setImgUrl(errorImgUrl)
             return
         }
-        const srcResult = getImgUrlBySubProductIdApi(firstSubProductId)
-        setImgUrl(srcResult)
+        const srcResult = getImgUrlBySubProductIdApi(subproductId)
+        setImgUrl(srcResult||"error")
     }
     useEffect(() => { getProductImgUrl() }, [])
     return <Card sx={{ padding: 1, textAlign: 'center' }}>
@@ -26,9 +28,9 @@ export const ProductCard = (props: { id: number, text: string, firstSubProductId
                         <div className="loading-ring"><div></div><div></div><div></div><div></div></div>
                     </div>
                     :
-                    <img style={{ width: '100%' }} src={imgUrl} alt={text} onError={e => handleImgError(e)} />
+                    <img style={{ width: '100%' }} src={imgUrl} alt={name} onError={e => handleImgError(e)} />
             }
-            <div>{text}</div>
+            <div>{name}</div>
         </Link>
     </Card>
 }
