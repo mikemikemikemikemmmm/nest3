@@ -25,7 +25,6 @@ export const getSubproductImageFilePath = (spId:string)=>{
 export const getMenuBannerImageFilePath = (menuId:string)=>{
     return join(process.cwd(),"public",`${getNowEnviroment()}`,"menu",`${menuId}.jpg`)
 }
-
 export const getProductImageFilePath = (productId:string,imageName:string)=>{
     return join(process.cwd(),"public",`${getNowEnviroment()}`,"products",productId,`${imageName}.jpg`)
 }
