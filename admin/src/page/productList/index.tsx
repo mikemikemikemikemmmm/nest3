@@ -126,8 +126,7 @@ export const ProductListPage = () => {
                 </Stack>
             </ModalContainer>
             <Grid container spacing={1}>
-                <Grid item xs md />
-                <Grid item xs={12} md={10}>
+                <Grid item xs={12} >
                     <Card sx={{ margin: 1 }}>
                         <Box sx={{ display: "flex", alignItems: "center", padding: 1, justifyContent: "center" }}>
                             <TextField
@@ -164,6 +163,7 @@ export const ProductListPage = () => {
                 searchResult?.map(p =>
                     <Box key={p.id}>
                         <ProductListItem
+                            rerender={renderToGetNewData}
                             handleDelete={handleDelete}
                             handleSelect={handleSelect}
                             handleEdit={handleEdit}
@@ -172,6 +172,7 @@ export const ProductListPage = () => {
                     </Box>
                 )
             }
+
         </>
     )
 }

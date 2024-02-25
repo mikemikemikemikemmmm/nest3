@@ -3,10 +3,9 @@ import { useRef, useState } from "react"
 import { FAKE_ID_FOR_CREATE } from "../../const"
 import { dispatchError } from "../../utils/errorHandler"
 import { EntityName, createOneApi, updateOneByIdApi } from "../../api/entity"
-import { Box, Button, Fab, FormControl, InputLabel, MenuItem, Select } from "@mui/material"
+import { Box, Button, Fab, FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material"
 import { FieldWrapper } from "../../component/fieldWrapper"
 import { isInputValid, isModalAllInputValid } from "@/utils/textInput"
-
 export interface ProductModalDataProp extends CreateDto.Product {
     "id": number
 }
@@ -22,20 +21,10 @@ export const ProductModal = (props: {
         name: modalDataProp.name,
         order: modalDataProp.order,
         genderId: modalDataProp.genderId,
-        seriesId: modalDataProp.seriesId,
-        imageFiles: modalDataProp.imageFiles
+        seriesId: modalDataProp.seriesId
     })
     const [toggle, setToggle] = useState(false)
     const errors = useRef<{ [key: string]: boolean }>({})
-    const setImageFile = (file:File,imageIndex:number)=>{
-        const newFilesList = [...inputData.imageFiles]
-        newFilesList[imageIndex] = file
-        setInputData({...inputData,imageFiles:newFilesList})
-    }
-    const createNewImageFile= (file:File)=>{
-        const newFilesList = [...inputData.imageFiles,file]
-        setInputData({...inputData,imageFiles:newFilesList})
-    }
     const handleSubmit = async () => {
         if (!isModalAllInputValid(inputData, errors)) {
             setToggle(!toggle)
@@ -116,6 +105,11 @@ export const ProductModal = (props: {
                     }
                 </Select>
             </FormControl>
+            {/* <Grid container spacing={1}>
+                <button onClick={()=>createNewImageFile()}></button>
+                {renderImage()}
+                <img src={getProductImgUrlApi(modalDataProp.id,1)} alt="" />
+            </Grid> */}
             <Button variant="contained" onClick={() => handleSubmit()}>送出</Button>
         </>
     )

@@ -1,7 +1,7 @@
 //layout
 export const enum ZIndex {
     Loading = 1,
-    Alert = 3,
+    Alert = 5,
     Modal = 4
 }
 export const DRAWER_WIDTH = 200
@@ -17,6 +17,9 @@ export const getProductUploadImgKey = (imageIndex: number) => `${PRODUCT_UPLOAD_
 export const PRODUCT_WIDTH = 760
 export const PRODUCT_HEIGHT = 910
 
+export const MENU_BANNER_WIDTH = 1010
+export const MENU_BANNER_HEIGHT = 400
+
 //system
 export const BASE_URL = import.meta.env.VITE_DB_BASE_URL
 export const ADMIN_API_PREFIX = "admin"
@@ -24,5 +27,5 @@ export const STATIC_API_PREFIX = 'static'
 export const KEY_FOR_UPLOAD_IMAGE_FORM_DATA = "KEY_FOR_UPLOAD_IMAGE_FORM_DATA"
 export const FORMDATA_KEY_FOR_DTO = 'stringifyJson'
 export const FAKE_ID_FOR_CREATE = -99
-export const TOKEN_HEADER = "token"
 export const CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR = "createProductBySeriesId"
+export const TOKEN_KEY_IN_LOCALSTORAGE = "token"

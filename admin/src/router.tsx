@@ -10,7 +10,8 @@ export const childrenRoute: (RouteObject & { name: string, showOnDrawer?: boolea
     {
         path: "/",
         element: <LoginPage />,
-        name: "登入"
+        name: "登入",
+        showOnDrawer: false
     },
     {
         path: "/navigation",
@@ -38,12 +39,12 @@ export const childrenRoute: (RouteObject & { name: string, showOnDrawer?: boolea
         name: "存貨",
         element: <StockPage />
     },
-    {
-        path: "*",
-        name:"index",
-        showOnDrawer: false,
-        element: <LoginPage />
-    },
+    // {
+    //     path: "*",
+    //     name:"index",
+    //     showOnDrawer: false,
+    //     element: <LoginPage />
+    // },
 ]
 
 export const browserRouter = createBrowserRouter([

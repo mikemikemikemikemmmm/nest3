@@ -101,18 +101,19 @@ export const ProductDetailPage = () => {
         setToggleToRender(!toggleToRender)
     }
     const renderProductImage = () => {
-        const { imageCount } = product
+        const { imageFileNameListStringifyJson } = product
         const domList = [] as JSX.Element[]
-        for (let i = 0; i < imageCount; i++) {
+        const imgFileList: string[] = JSON.parse(imageFileNameListStringifyJson)
+        imgFileList.forEach(imageName => {
             const imgGrid = (
-                <Grid item lg={2} md={3} sm={6} xs={12} key={i} >
+                <Grid item sm={2} xs={4} key={imageName} >
                     <img
                         width={"100%"}
                         onError={(e) => handleImgError(e)}
-                        src={getProductImgUrlApi(product.id, i + 1, product.updated_at)} />
+                        src={getProductImgUrlApi(product.id, imageName)} />
                 </Grid>)
             domList.push(imgGrid)
-        }
+        })
         return domList
     }
     if (!subProducts || !product || !colors || !sizes) {

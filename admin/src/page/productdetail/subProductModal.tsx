@@ -5,12 +5,12 @@ import { dispatchError } from "../../utils/errorHandler"
 import { setIsLoading } from "../../store"
 import { getImgUrlBySubProductIdApi } from "../../api/staticFile"
 import { useDispatch } from "react-redux"
-import { EntityName, createOneApi, createSubProductAPi, updateOneByIdApi, updateSubProductApi } from "../../api/entity"
 import { handleImgError } from "../../utils/imgError"
 import { Box, Button, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from "@mui/material"
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { isInputValid, isModalAllInputValid } from "@/utils/textInput"
 import { FieldWrapper } from "@/component/fieldWrapper"
+import { createSubProductAPi, updateSubProductApi } from "@/api/page/productDetail"
 
 export interface SubProductModalDataProp extends CreateDto.SubProduct {
     id: number

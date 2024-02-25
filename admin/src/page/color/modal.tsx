@@ -4,12 +4,12 @@ import { useState } from "react"
 import { COLOR_IMG_HEIGHT, COLOR_IMG_WIDTH, FAKE_ID_FOR_CREATE } from "../../const"
 import { dispatchError } from "../../utils/errorHandler"
 import { setIsLoading } from "../../store"
-import { EntityName, createColorAPi, createOneApi, updateColorApi, updateOneByIdApi } from "../../api/entity"
 import { Box, Button, IconButton, TextField } from "@mui/material"
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { handleImgError } from "../../utils/imgError"
 import { getColorImageUrlApi } from "../../api/staticFile"
 import { FieldWrapper } from "../../component/fieldWrapper"
+import { createColorAPi, updateColorApi } from "@/api/page/color"
 const COLOR_MODAL_IMG_DOM_ID = "COLOR_MODAL_IMG_DOM_ID"
 export interface ColorModalData extends CreateDto.Color {
     id: number
@@ -129,7 +129,7 @@ export const ColorModal = (props: {
                     <AddPhotoAlternateIcon />
                     <input hidden accept=".jpg" type="file" onChange={e => handleUploadImg(e)} />
                 </IconButton>
-            <div>上傳圖片 僅限 48px x 48px jpg檔案</div>
+                <div>上傳圖片 僅限 {COLOR_IMG_WIDTH}px x {COLOR_IMG_HEIGHT}px jpg檔案</div>
             </Box>
             <Button size="small" variant="contained" onClick={() => handleSubmit()}>
                 送出

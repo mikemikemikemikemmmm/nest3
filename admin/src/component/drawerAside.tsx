@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -9,9 +9,21 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { childrenRoute } from '../router';
+import { deleteToken, getToken, setToken } from '@/utils/token';
 export default function DrawerAside() {
     const navigate = useNavigate()
     const [isShow, setIsShow] = useState(false);
+    const [isLogin, setIsLogin] = useState(false);
+    useEffect(() => {
+        if(!getToken()){
+            setIsLogin(false)
+        }else{
+            setIsLogin(true)
+        }
+    })
+    if(!isLogin){
+        return null
+    }
     const toggleDrawer =
         (isShow: boolean) =>
             (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -27,6 +39,10 @@ export default function DrawerAside() {
             };
     const handleClickRoute = (toPath: string) => {
         navigate(toPath)
+    }
+    const handleLoginOut = () => {
+        deleteToken()
+        navigate("/")
     }
     return (
         <React.Fragment key={'left'}>
@@ -47,13 +63,18 @@ export default function DrawerAside() {
                     <List>
                         {childrenRoute.map(route => (
                             route.showOnDrawer === false ?
-                            null:
-                            <ListItem key={route.path} disablePadding>
-                                <ListItemButton onClick={() => handleClickRoute(route.path || "")}>
-                                    <ListItemText sx={{ textAlign: 'center' }} primary={route.name} />
-                                </ListItemButton>
-                            </ListItem>
+                                null :
+                                <ListItem key={route.path} disablePadding>
+                                    <ListItemButton onClick={() => handleClickRoute(route.path || "")}>
+                                        <ListItemText sx={{ textAlign: 'center' }} primary={route.name} />
+                                    </ListItemButton>
+                                </ListItem>
                         ))}
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={() => handleLoginOut()}>
+                                <ListItemText sx={{ textAlign: 'center' }} primary={"登出"} />
+                            </ListItemButton>
+                        </ListItem>
                     </List>
                 </Box>
             </Drawer>

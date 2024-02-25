@@ -19,6 +19,9 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
   } else {
     return {
       ...commonConfig,
+      server:{
+        port:5173
+      }
     }
   }
 })

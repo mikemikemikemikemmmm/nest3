@@ -1,4 +1,4 @@
-import { baseApi, ResponseType } from "./base"
+import { baseApi, ErrorResponse, ResponseType } from "./base"
 import { CLIENT_API_PREFIX } from "../config"
 import { AxiosResponse } from "axios"
 const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>) => {
@@ -9,7 +9,7 @@ const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>) => {
     }
 }
 
-const handleCatch = (error: Error): ResponseType => {
+const handleCatch = (error: Error): ErrorResponse => {
     return {
         isSuccess: false,
         errorMessage: error.message || "發生錯誤"
@@ -28,14 +28,14 @@ export const getBaseApi = async <GetData>(url: string, queryParams?: { [key: str
 
 
 type NavigationType = "menu" | "category" | "subCategory"
-export interface NavigationData {
+export interface NavigationTree {
     id: number,
     name: string,
     route: string
     type: NavigationType,
-    children: NavigationData[]
+    children: NavigationTree[]
 }
-export const getAllNavApi = () => getBaseApi<NavigationData[]>('navigation')
+export const getNavigationTreeApi = () => getBaseApi<NavigationTree[]>('navigation')
 export interface ProductCard {
     id: number,
     name: string,
@@ -73,11 +73,16 @@ export interface SubproductData {
     sizes: SizeData[]
 }
 export interface ProductDetailData {
+    imageFileNameListStringifyJson: string
     id: number,
     name: string,
     genderId: number,
     genderName: string,
     subproducts: SubproductData[]
 }
-export const getProductDetailByProductIdApi = (productId: number) =>
+export const getProductDetailByProductIdApi = (productId: string) =>
     getBaseApi<ProductDetailData>(`productDetail/${productId}`)
+
+
+export const getProductMenuRouteApi = (productId: string) =>
+    getBaseApi<{ menuRoute: string }>(`menuRoute/${productId}`)

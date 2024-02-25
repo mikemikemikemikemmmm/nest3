@@ -6,6 +6,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
   if (command === 'build') {
     return {
       base: '/nest2/client/',
+      assetsInclude: ['**/*.jpg'],
       plugins: [react({
         babel: {
           plugins: [
@@ -17,13 +18,10 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
   } else {
     return {
       plugins: [react()],
-      test: {
-        environment: 'happy-dom',
-        coverage: {
-          provider: 'c8',
-          reporter: ['text', 'json', 'html'],
-        },
-      },
+      assetsInclude: ['**/*.jpg'],
+      server:{
+        port:5174
+      }
     }
   }
 })

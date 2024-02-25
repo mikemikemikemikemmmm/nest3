@@ -1,27 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { NavData } from './api/get'
+import { NavigationTree } from './api/get'
+import { useSelector } from 'react-redux'
 
-export interface NavState {
-    allNavData: NavData[],
+export interface NavigationState {
+    navigationTree: NavigationTree[]
 }
 
 const initialState = {
-    allNavData: [],
-} as NavState
+    navigationTree: []
+} as NavigationState
 
 export const navSlice = createSlice({
     name: 'nav',
     initialState,
     reducers: {
-        setAllNavData: (state, action: PayloadAction<NavData[]>) => {
-            state.allNavData = action.payload
-        },
+        setNavigationTree: (state, action: PayloadAction<NavigationTree[]>) => {
+            state.navigationTree = action.payload
+        }
     },
 })
 
-export const { setAllNavData } = navSlice.actions
+export const { setNavigationTree } = navSlice.actions
 
 export const store = configureStore({
     reducer: {
@@ -31,3 +32,4 @@ export const store = configureStore({
 export default navSlice.reducer
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+export const useAppSelector = useSelector<RootState>

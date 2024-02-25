@@ -1,23 +1,34 @@
-import { NavigationData } from './api/get'
 import './style/index.css'
 import { MenuNavigation } from './component/nav'
-import { Outlet, useLoaderData } from 'react-router-dom'
-import { AsideComponent } from './component/aside'
+import { Outlet } from 'react-router-dom'
+import { NavigationTree, getNavigationTreeApi } from './api/get'
+import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { setNavigationTree } from './store'
+import { Wrapper } from './component/wrapper'
 function App() {
-    const { navigationData ,menuRoute} = useLoaderData() as { navigationData: NavigationData[],menuRoute?:string }
-    if (navigationData.length === 0) {
-        return <div></div>
+    const [navigationTree, _setNavigationTree] = useState<NavigationTree[]>([])
+    const dispatch = useDispatch()
+    const getNavigationTree = async () => {
+        const get = await getNavigationTreeApi()
+        if (get.isSuccess) {
+            _setNavigationTree(get.data)
+            dispatch(setNavigationTree(get.data))
+        }
+    }
+    useEffect(() => {
+        getNavigationTree()
+    }, [])
+    if (navigationTree.length === 0) {
+        return null
     }
     return (
-        <div className="w-screen h-screen">
-            <MenuNavigation menuRoute={menuRoute} navigationData={navigationData} />
-            <div className="flex">
-                <AsideComponent navigationData={navigationData} />
-                <span className="flex-grow">
-                    <Outlet />
-                </span>
-            </div>
-        </div >
+        <Wrapper>
+            <>
+                <MenuNavigation navigationTree={navigationTree} />
+                <Outlet />
+            </>
+        </Wrapper>
     )
 
 }

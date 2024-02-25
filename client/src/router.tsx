@@ -1,13 +1,13 @@
 
 import { createBrowserRouter, createHashRouter, RouteObject, RouterProvider } from 'react-router-dom'
 import { DetailPage } from './page/detail'
-import { getAllNavApi,  getProductDetailByProductIdApi, getSeriesDataApi, SeriesData } from './api/get'
+import {  getProductDetailByProductIdApi, getSeriesDataApi, SeriesData } from './api/get'
 import { ProductListPage } from './page/list'
 import { ErrorComponent } from './component/errorComponent'
-import { errorHandler } from './errorHandler'
 import { IndexPage } from './page'
 import App from './App'
 import { ErrorPage } from './page/error'
+import { WrapperWithAside } from './component/wrapperWithAside'
 
 export const childrenRoute: RouteObject[] = [
     {
@@ -15,69 +15,54 @@ export const childrenRoute: RouteObject[] = [
         path: ""
     },
     {
-        errorElement: <ErrorPage />,
-        element: <DetailPage />,
-        path: "detail/:productId",
-        loader: async ({ params }) => {
-            const productId = Number(params.productId)
-            if (!Number.isInteger(productId) || productId <= 0) {
-                throw Error
+        element: <WrapperWithAside />,
+        children: [{
+            errorElement: <ErrorComponent />,
+            element: <DetailPage />,
+            path: "detail/:productId",
+            loader: async ({ params }) => {
+                const { productId } = params
+                const get = await getProductDetailByProductIdApi(productId as string)
+                if (get.isSuccess) {
+                    return { productDetailData: get.data }
+                }
+                return null
             }
-            const result = await getProductDetailByProductIdApi(productId)
-            if (!result.isSuccess) {
-                return errorHandler(result.errorMessage)
+        },
+        {
+            errorElement: <ErrorComponent />,
+            element: <ProductListPage />,
+            path: ":menuRoute/:categoryRoute/:subcategoryRoute",
+            loader: async ({ params }) => {
+                const { menuRoute, categoryRoute, subcategoryRoute } = params
+                const get = await getSeriesDataApi(menuRoute as string, categoryRoute, subcategoryRoute)
+                if (get.isSuccess) {
+                    return { seriesDatas: get.data }
+                }
+                return null
             }
-            return { productDetailData: result.data,menuRoute:result.data.menuRoute }
-        }
+        },
+        {
+            element: <ProductListPage />,
+            path: ":menuRoute",
+            loader: async ({ params }) => {
+                const { menuRoute } = params
+                const get = await getSeriesDataApi(menuRoute as string)
+                if (get.isSuccess) {
+                    return { seriesDatas: get.data }
+                }
+                return null
+            }
+        },]
     },
-    {
-        errorElement: <ErrorComponent />,
-        element: <ProductListPage />,
-        path: ":navRoute/:categoryRoute/:subcategoryRoute",
-        loader: async ({ params }) => {
-            const { navRoute, categoryRoute, subcategoryRoute } = params
-            if(!navRoute){
-                throw Error
-            }
-            const result = await getSeriesDataApi(navRoute, categoryRoute, subcategoryRoute)
-            if (!result.isSuccess) {
-                return errorHandler(result.errorMessage)
-            }
-            return { seriesDatas: result.data }
 
-        }
-    },
-    {
-        element: <ProductListPage />,
-        path: ":navRoute",
-        loader: async ({ params ,}) => {
-            const { navRoute } = params
-            if(!navRoute){
-                return { seriesDatas: undefined }
-            }
-            const result = await getSeriesDataApi(navRoute)
-            if (!result.isSuccess) {
-                return { seriesDatas: undefined }
-            }
-            return { seriesDatas: result.data }
-
-        }
-    },
 ]
-
 export const browserRouter = createBrowserRouter([
     {
         path: "/",
         element: <App />,
         children: childrenRoute,
         errorElement: <ErrorPage />,
-        loader: async () => {
-            const result = await getAllNavApi()
-            if (result.isSuccess) {
-                return { navigationData: result.data }
-            } else {
-                throw Error
-            }
-        },
     },
 ]);
+

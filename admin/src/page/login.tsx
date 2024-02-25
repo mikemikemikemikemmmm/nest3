@@ -2,29 +2,27 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { dispatchError, dispatchSuccess } from "../utils/errorHandler"
 import { getToken, setToken } from "../utils/token"
+import { loginApi, testTokenApi } from "@/api/page/login"
 
 export const LoginPage = () => {
-
+    const navigate = useNavigate()
     const [password, setPassword] = useState('')
-    const navigate = useNavigate();
-    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
     const handleLogin = async () => {
-        if (!password || !name) {
-            dispatchError('名稱與密碼不得為空')
+        if (!password || !email) {
+            dispatchError('信箱與密碼不得為空')
             return
         }
-        // const { result, error } = await loginApi({ name, password })
-        // if (error) {
-        //     return dispatchError(error)
-        // }
-        // setToken(result)
-        // dispatchSuccess('登入成功')
-        // navigate('/category')
+        const login = await loginApi({ email, password })
+        if (login.isSuccess) {
+            dispatchSuccess('登入成功')
+            navigate("/color")
+        }
     }
     const testToken = async () => {
-        // const { result, error } = await testTokenApi()
-        // if (result === true) {
-        //     navigate('/category')
+        // const test = await testTokenApi()
+        // if(test.isSuccess){
+        //     navigate("/color")
         // }
     }
     useEffect(() => {
@@ -35,10 +33,10 @@ export const LoginPage = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: "center",
-            height:"100%"
+            height: "100%"
         }}>
             <div style={{ padding: 20 }}>
-                <input type="text" style={{ display: 'block', padding: 10, margin: 10 }} placeholder="名稱" onChange={(e) => setName(e.target.value)} />
+                <input type="text" style={{ display: 'block', padding: 10, margin: 10 }} placeholder="信箱" onChange={(e) => setEmail(e.target.value)} />
                 <input type="password" style={{ display: 'block', padding: 10, margin: 10 }} placeholder="密碼" onChange={(e) => setPassword(e.target.value)} />
                 <div style={{ textAlign: 'center' }}>
                     <button style={{ padding: 10, margin: 10, textAlign: 'center' }} onClick={() => handleLogin()}>

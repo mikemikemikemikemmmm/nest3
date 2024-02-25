@@ -9,7 +9,8 @@ export namespace CreateDto {
         order: number,
         route: string,
         parentId: number,
-        type: NavigationTreeItemType
+        type: NavigationTreeItemType,
+        imageFile?: File
     }
     export interface User {
         email: string
@@ -29,8 +30,7 @@ export namespace CreateDto {
         "name": string,
         "order": number
         "genderId": number
-        "seriesId": number,
-        imageFiles: File[]
+        "seriesId": number
     }
     export interface SubProduct extends ImageFileMixin {
         productId: number,
@@ -79,7 +79,7 @@ export namespace GetOneResponse {
         navigationName: string
     }
     export type Product = CreateDto.Product & IdMixin & {
-        genderName: string, navigationName: string, imageCount: number
+        genderName: string, navigationName: string,imageFileNameListStringifyJson:string
     }
     export type SubProduct = CreateDto.SubProduct & IdMixin & {
         colorName: string,

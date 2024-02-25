@@ -1,45 +1,52 @@
 import { Link, NavLink, useLoaderData, useLocation, useParams } from 'react-router-dom'
-import { NavigationData } from '../api/get'
 import { useEffect, useState } from 'react';
+import { NavigationTree, getProductMenuRouteApi } from '../api/get';
+import { NavigationState, useAppSelector } from '../store';
+import { useGetMenuRoute } from '../utils';
 
-export const MenuNavigation = (props: { navigationData: NavigationData[]}) => {
-    const location = useLocation();
-    const [menuRoute, setMenuRoute] = useState();
-
-    useEffect(() => {
-        // execute on location change
-        console.log('Location changed!', location); //TODO
-    }, [location]);
+export const MenuNavigation = (props: { navigationTree: NavigationTree[] }) => {
+    const menuRoute = useGetMenuRoute()
     return (
-        <nav className="w-full flex items-end h-24 mb-4" >
-            <Link to={'/'} style={{ fontSize: 48 }}>
-                lativ
-            </Link>
-            <div className='pb-4 ml-24 text-lg'>
-                {props.navigationData
-                    .filter(nav => {
-                        if (nav.children.length === 0) {
-                            return false
-                        }
-                        if (nav.children.every(category => category?.children?.length === 0)) {
-                            return false
-                        }
-                        return true
-                    })
-                    .map(menu => (
-                        <NavLink
-                            // style={{ backgroundColor: loaderData?.navRoute === nav.route ? '#F0EDE5' : 'white' }} key={nav.id}
-                            className={({ isActive }) =>
-                                `inline-block w-32 text-center py-1 hover:bg-amber-300 hover:text-slate-800
-                                ${(isActive)?"bg-slate-500":""}
+        <>
+            <div className="h-10"/>
+            <nav className="w-full items-end mb-6" >
+                <Link to={'/'} className=" text-logo inline-block w-aside text-5xl">
+                    lativ
+                </Link>
+                <div className='inline-block text-lg'>
+                    {props.navigationTree
+                        // .filter(menu => {
+                        //     if (menu.children.length === 0) {
+                        //         return false
+                        //     }
+                        //     if (menu.children.every(category => category?.children?.length === 0)) {
+                        //         return false
+                        //     }
+                        //     return true
+                        // })
+                        .map((menu, i) => (
+                            <span
+                                key={menu.id}
+                                className="inline-block">
+                                <Link className={
+                                    `inline-block text-center w-32 py-1 hover:text-nav-hover
+                                ${menuRoute === menu.route ? "bg-nav-actived_bg text-nav-hover" : "text-nav-text"}
                                 `
-                            }
-                            key={menu.id}
-                            to={`/${menu.route}`}
-                        >
-                            {menu.name}
-                        </NavLink>))}
-            </div>
-        </nav>
+                                }
+
+                                    to={`/${menu.route}`}
+                                >
+                                    {menu.name}
+                                </Link>
+                                {
+                                    i === props.navigationTree.length - 1 ||
+                                    <span >
+                                        |
+                                    </span>
+                                }
+                            </span>))}
+                </div>
+            </nav>
+        </>
     )
 }

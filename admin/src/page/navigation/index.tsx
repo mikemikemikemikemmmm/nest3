@@ -125,18 +125,18 @@ export const NavigationPage = () => {
     }
     const getNavigationTree = async () => {
         const response = await getNavigationTreeApi()
-        if (response?.isSuccess) {
-            setNavigationTreeData(response?.data)
+        if (response.isSuccess) {
+            setNavigationTreeData(response.data)
             if (selectedMenu) {
                 const selectedMenuInNewData =
-                    response?.data.find(data => data.id === selectedMenu.id)
+                    response.data.find(data => data.id === selectedMenu.id)
                 if (selectedMenuInNewData) {
                     setSelectedMenu(selectedMenuInNewData)
                 }
             }
         }
     }
-    const handleCreateProductAtSereis = (seriesId: number) => { //TODO
+    const handleCreateProductAtSereis = (seriesId: number) => { 
         navigateFn(`/productList/?${CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR}=${seriesId}`)
     }
     useEffect(() => {

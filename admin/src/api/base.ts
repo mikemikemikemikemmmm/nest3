@@ -1,14 +1,16 @@
 import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { BASE_URL, ADMIN_API_PREFIX, TOKEN_HEADER } from '../const'
+import { BASE_URL, ADMIN_API_PREFIX, TOKEN_KEY_IN_LOCALSTORAGE } from '../const'
 import { pushAlertItem, setIsLoading, store } from '../store'
-import { getToken } from '../utils/token'
+import { deleteToken, getToken } from '../utils/token'
 import { browserRouter } from '../router'
 export const baseApi = axios.create({
     baseURL: BASE_URL,
 })
 baseApi.interceptors.request.use((config) => {
-    if (config.headers && typeof config.headers.set === 'function') {
-        config.headers.set(TOKEN_HEADER, getToken())
+    const token = getToken()
+    if (token) {
+        //@ts-ignore
+        config.headers?.set("Authorization", `Bearer ${token}`)
     }
     return config
 })
@@ -16,6 +18,9 @@ baseApi.interceptors.response.use((response) => {
     return response
 }, function (error) {  // when code is larger than 200
     if (error.response?.status === 401) {
+        if(getToken()){
+            deleteToken()
+        }
         browserRouter.navigate('/')
     }
     const errorMessage =
@@ -24,16 +29,15 @@ baseApi.interceptors.response.use((response) => {
 })
 
 
-
-
-
-type ResponseType<T = any> = {
-    data: T,
-    isSuccess: true
-} | {
+type ErrorResponse = {
     isSuccess: false,
     errorMessage: string
 }
+type SuccessResponse<T> = {
+    data: T,
+    isSuccess: true
+}
+type ResponseType<T> = SuccessResponse<T> | ErrorResponse
 const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>, successText: string) => {
     if (resonse.data.isSuccess) {
         pushAlertItem({ severity: 'success', text: successText })
@@ -42,7 +46,7 @@ const handleResponse = <T>(resonse: AxiosResponse<ResponseType<T>, any>, success
         throw Error(resonse.data.errorMessage)
     }
 }
-const handleCatch = (error: Error): ResponseType  => {
+const handleCatch = (error: Error): ErrorResponse => {
     pushAlertItem({
         severity: 'error',
         text: error.message || "發生錯誤"
@@ -71,7 +75,7 @@ export const getBaseApi = async <GetData>(
 export const postBaseApi = async (url: string, createDto: object) => {
     const { dispatch } = store
     dispatch(setIsLoading(true))
-    return await baseApi.post(`/${ADMIN_API_PREFIX}/${url}`, createDto)
+    return await baseApi.post(`${ADMIN_API_PREFIX}/${url}`, createDto)
         .then(resonse => {
             return handleResponse(resonse, "新增成功")
         })

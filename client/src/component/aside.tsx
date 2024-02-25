@@ -1,21 +1,22 @@
 import React, { useEffect } from 'react'
 import { Link, useLoaderData, useNavigate, useParams } from 'react-router-dom'
-import { ASIDE_WIDTH } from '../style/const'
-import { NavigationData } from '../api/get'
-export const AsideComponent = (props: { navigationData: NavigationData[] }) => {
-    const { navRoute } = useParams()
-    if (!navRoute || navRoute === "") {
-        return null
+import { NavigationTree } from '../api/get'
+import { useSelector } from 'react-redux'
+import { NavigationState, useAppSelector } from '../store'
+import { useGetMenuRoute } from '../utils'
+export const AsideComponent = (props: { menuRoute: string }) => {
+    const { menuRoute } = props
+    const navigationTree = useAppSelector(s => s.navSlice.navigationTree) as NavigationTree[]
+    const currentMenu = navigationTree.find(menu => menu.route === menuRoute)
+    if (!currentMenu) {
+        return <aside
+            className="align-top inline-block list-none text-aside w-aside"
+        />
     }
-    const currentNav = props.navigationData.find(n => n.route === navRoute)
-    if (!currentNav || currentNav.children.length === 0) {
-        return null
-    }
-    const asideData = currentNav.children
+    const asideData = currentMenu.children
     return (
         <aside
-            className=" align-top inline-block list-none text-aside"
-            style={{ width: ASIDE_WIDTH }}
+            className="align-top inline-block list-none text-aside w-aside"
         >
             <ul>
                 {
@@ -23,23 +24,27 @@ export const AsideComponent = (props: { navigationData: NavigationData[] }) => {
                         .filter(category => category.children.length > 0)
                         .map(category => <ul key={category.id}>
                             <li>
-                                <h2 className='text-sm font-bold from-neutral-900'> {category.name}</h2>
+                                <h2 className='text-lg font-bold from-neutral-900'>
+                                    <span className="inline-block">。</span>
+                                    {category.name}
+                                </h2>
                                 <ul>
                                     {category.children.map(subcategory =>
                                         <li
                                             key={subcategory.id}
-                                            className="my-2  hover:underline hover:text-asideHover">
+                                            className="my-2 text-lg hover:underline hover:text-asideHover">
                                             <Link
                                                 key={subcategory.id}
-                                                to={`/${currentNav.route}/${category.route}/${subcategory.route}`}>
-                                                {`  > ${subcategory.name}`}
+                                                to={`/${menuRoute}/${category.route}/${subcategory.route}`}>
+                                                <span className="inline-block">＞</span>
+                                                {subcategory.name}
                                             </Link>
                                         </li>)}
                                 </ul>
                             </li>
                         </ul>)
                 }
-            </ul> 
+            </ul>
         </aside>
     )
 }

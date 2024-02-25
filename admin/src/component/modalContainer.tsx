@@ -1,3 +1,4 @@
+import { ZIndex } from "@/const";
 import { Modal, Box } from "@mui/material";
 import { Theme } from '@mui/material/styles/createTheme'
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx'
@@ -20,7 +21,7 @@ export const ModalContainer = (
         p: 3,
     } as  SxProps<Theme> 
     return (
-        <Modal open={props.isOpen} onClose={props.closeFn}>
+        <Modal sx={{zIndex:ZIndex.Modal}} open={props.isOpen} onClose={props.closeFn}>
             <Box sx={boxStyle}>
                 {props.children}
             </Box>
