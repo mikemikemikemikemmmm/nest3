@@ -150,13 +150,13 @@ export const ProductDetailPage = () => {
                     >
                         刪除產品
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="contained"
                         sx={{ marginLeft: 1 }}
                         onClick={() => handleDeleteProduct()}
                     >
                         修改產品
-                    </Button>
+                    </Button> */}
                 </Box>
                 <Box margin={1}>排序：{product?.order}</Box>
                 <Box margin={1}>種類：{product?.navigationName}</Box>

@@ -42,14 +42,13 @@ export const SubProductModal = (props: Props) => {
     const errors = useRef<{ [key: string]: boolean }>({})
     const hasSameColorId = () => {
         return subProducts.some(sp => {
-            if (sp.colorId === inputData.colorId && sp.id!==modalDataProp.id) {
+            if (sp.colorId === inputData.colorId && sp.id !== modalDataProp.id) {
                 return true
             }
         })
     }
     const handleSubmit = async () => {
-        console.log(inputData.imageFile, 111)
-        if(hasSameColorId()){
+        if (hasSameColorId()) {
             dispatchError("有同樣顏色的產品")
             return
         }
@@ -81,8 +80,8 @@ export const SubProductModal = (props: Props) => {
             errors.current[key] = true
         } else {
             errors.current[key] = false
+            setInputData({ ...inputData, [key]: typedVal })
         }
-        setInputData({ ...inputData, [key]: typedVal })
     }
     const getImagePreviewUrl = () => {
         if (imageBase64Url) {
@@ -118,7 +117,6 @@ export const SubProductModal = (props: Props) => {
                     dispatchError(`長寬有一不為${SUB_PRODUCT_IMG_WIDTH}px`)
                     return
                 }
-                console.log(111111111111111, uploadedImageFile)
                 setInputData({ ...inputData, imageFile: uploadedImageFile })
                 setImageBase64Url(tempImageBase64Url)
                 dispatch(setIsLoading(false))
@@ -178,37 +176,16 @@ export const SubProductModal = (props: Props) => {
                         sx={inputSX}
                         label="價格"
                         error={errors.current.price}
-                        defaultValue={inputData.price}
+                        value={inputData.price}
                         onChange={val => handleSetData(val, "price")}
                     />
                     <FieldWrapper
                         sx={inputSX}
                         label="排序"
                         error={errors.current.order}
-                        defaultValue={inputData.order}
+                        value={inputData.order}
                         onChange={val => handleSetData(val, "order")}
                     />
-                    {/* <FieldWrapper
-                        sx={inputSX}
-                        label="S存量"
-                        error={errors.current.size_S}
-                        defaultValue={inputData.size_S}
-                        onChange={val => handleSetData(val, "size_S")}
-                    />
-                    <FieldWrapper
-                        sx={inputSX}
-                        label="M存量"
-                        error={errors.current.size_M}
-                        defaultValue={inputData.size_M}
-                        onChange={val => handleSetData(val, "size_M")}
-                    />
-                    <FieldWrapper
-                        sx={inputSX}
-                        label="L存量"
-                        error={errors.current.size_L}
-                        defaultValue={inputData.size_L}
-                        onChange={val => handleSetData(val, "size_L")}
-                    /> */}
                     <FormControl sx={inputSX}>
                         <InputLabel id="size-label">尺寸</InputLabel>
                         <Select
@@ -234,7 +211,6 @@ export const SubProductModal = (props: Props) => {
                                     <MenuItem
                                         key={s.id}
                                         value={s.id}
-                                    // style={getStyles(name, personName, theme)}
                                     >
                                         {s.name}
                                     </MenuItem>

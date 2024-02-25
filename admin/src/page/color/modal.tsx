@@ -113,7 +113,7 @@ export const ColorModal = (props: {
             <FieldWrapper
                 label="名稱"
                 error={nameError}
-                defaultValue={inputData.name}
+                value={inputData.name}
                 onChange={val => handleChangeName(val)}
             />
             <Box sx={{ margin: 1, padding: 1, display: 'flex', justifyContent: 'center' }}>

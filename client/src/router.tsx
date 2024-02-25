@@ -1,7 +1,7 @@
 
 import { createBrowserRouter, createHashRouter, RouteObject, RouterProvider } from 'react-router-dom'
 import { DetailPage } from './page/detail'
-import {  getProductDetailByProductIdApi, getSeriesDataApi, SeriesData } from './api/get'
+import { getProductDetailByProductIdApi, getSeriesDataApi, SeriesData } from './api/get'
 import { ProductListPage } from './page/list'
 import { ErrorComponent } from './component/errorComponent'
 import { IndexPage } from './page'
@@ -22,6 +22,9 @@ export const childrenRoute: RouteObject[] = [
             path: "detail/:productId",
             loader: async ({ params }) => {
                 const { productId } = params
+                if (!productId) {
+                    return null
+                }
                 const get = await getProductDetailByProductIdApi(productId as string)
                 if (get.isSuccess) {
                     return { productDetailData: get.data }
@@ -43,15 +46,18 @@ export const childrenRoute: RouteObject[] = [
             }
         },
         {
+            errorElement: <ErrorComponent />,
             element: <ProductListPage />,
             path: ":menuRoute",
             loader: async ({ params }) => {
                 const { menuRoute } = params
                 const get = await getSeriesDataApi(menuRoute as string)
                 if (get.isSuccess) {
+                    if(!get.data.length){
+                        return null
+                    }
                     return { seriesDatas: get.data }
                 }
-                return null
             }
         },]
     },

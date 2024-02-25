@@ -1,7 +1,6 @@
 import { useDispatch } from "react-redux"
 import { useRef, useState } from "react"
 import { dispatchError } from "../../utils/errorHandler"
-import { createColorAPi, updateColorApi } from "../../api/entity"
 import { Box, Button, IconButton, TextField } from "@mui/material"
 import { FieldWrapper } from "../../component/fieldWrapper"
 import { ProductWithStock, SubproductWithStock } from "@/api/page/stock"
@@ -20,7 +19,6 @@ export const StockModal = (props: {
     forcedRender: () => void,
 }) => {
     const { modalDataProp, forcedRender, closeModal } = props
-    console.log(modalDataProp)
     const targetSubproduct = useRef<SubproductWithStock>(modalDataProp.subproducts
         .find(sp => sp.id === modalDataProp.targetSubproductId) as SubproductWithStock)
     if (!targetSubproduct.current) {
@@ -49,13 +47,6 @@ export const StockModal = (props: {
             dispatchError("存貨不能為負數")
             return
         }
-        //     const executeUpdate =
-        //         await up(inputData, modalDataProp.id)
-        //     if (executeUpdate?.isSuccess) {
-        //         closeModal()
-        //         forcedRender()
-        //     }
-        // }
     }
     const handleChangeStock = (inputIndex: number, type: "plus" | "minus") => {
         const newInputData = [...inputData]

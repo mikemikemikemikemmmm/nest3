@@ -59,7 +59,7 @@ export const getSeriesDataApi = (menuRoute: string, categoryRoute: string = "", 
     if (subcategoryRoute !== "") {
         queryParams.subcategoryRoute = subcategoryRoute
     }
-    return getBaseApi("series", queryParams)
+    return getBaseApi<SeriesData[]>("series", queryParams)
 }
 export interface SizeData {
     id: number,

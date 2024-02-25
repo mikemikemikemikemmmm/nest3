@@ -54,20 +54,20 @@ export const ProductModal = (props: {
             errors.current[key] = true
         } else {
             errors.current[key] = false
+            setInputData({ ...inputData, [key]: typedVal })
         }
-        setInputData({ ...inputData, [key]: typedVal })
     }
     return (
         <>
             <FieldWrapper
                 label="名稱"
-                defaultValue={inputData.name}
+                value={inputData.name}
                 error={errors.current.name}
                 onChange={val => handleSetData(val, "name")}
             />
             <FieldWrapper
                 label="排序"
-                defaultValue={inputData.order}
+                value={inputData.order}
                 error={errors.current.order}
                 onChange={val => handleSetData(val, "order")}
             />
@@ -105,11 +105,6 @@ export const ProductModal = (props: {
                     }
                 </Select>
             </FormControl>
-            {/* <Grid container spacing={1}>
-                <button onClick={()=>createNewImageFile()}></button>
-                {renderImage()}
-                <img src={getProductImgUrlApi(modalDataProp.id,1)} alt="" />
-            </Grid> */}
             <Button variant="contained" onClick={() => handleSubmit()}>送出</Button>
         </>
     )

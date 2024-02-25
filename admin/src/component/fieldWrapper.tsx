@@ -3,7 +3,7 @@ import { SxProps, TextField } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 interface Props {
     label: string
-    defaultValue: string | number
+    value: string | number
     onChange: (val: string) => void
     error: boolean
     sx?: SxProps<Theme>
@@ -13,17 +13,17 @@ interface Props {
 const stringHelperText = "Can't be empty."
 const numHelperText = "Only accept non-zero positive integer."
 export const FieldWrapper = (props: Props) => {
-    const { config, disabled, error, defaultValue, sx, onChange, label } = props
+    const { config, disabled, error, value, sx, onChange, label } = props
     return <TextField
         {...config}
         disabled={disabled}
-        helperText={error && (typeof defaultValue === "string" ? stringHelperText : numHelperText)}
+        helperText={error && (typeof value === "string" ? stringHelperText : numHelperText)}
         error={error}
         sx={{ color: 'black', ...sx }}
         variant="outlined"
         size="small"
         label={label}
-        defaultValue={defaultValue}
+        value={value}
         onChange={e => onChange(e.target.value)}
         onBlur={e => onChange(e.target.value)}
     />

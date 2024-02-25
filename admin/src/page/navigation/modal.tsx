@@ -83,8 +83,8 @@ export const NavigationModal = (props: {
             errors.current[key] = true
         } else {
             errors.current[key] = false
-        }
         setInputData({ ...inputData, [key]: typedVal })
+        }
     }
     const handleUploadImg = (e: React.ChangeEvent<HTMLInputElement>) => {
         const uploadedImageFile = e.target.files?.[0]
@@ -124,20 +124,20 @@ export const NavigationModal = (props: {
             <FieldWrapper
                 label="名稱"
                 error={errors.current.name}
-                defaultValue={inputData.name}
+                value={inputData.name}
                 onChange={val => handleSetData(val, "name")}
             />
             <FieldWrapper
                 disabled={modalDataProp.type === "series"}
                 label="路徑"
-                defaultValue={inputData.route}
+                value={inputData.route}
                 error={errors.current.route}
                 onChange={val => handleSetData(val, "route")}
             />
             <FieldWrapper
                 label="排序"
                 error={errors.current.order}
-                defaultValue={inputData.order}
+                value={inputData.order}
                 onChange={val => handleSetData(val, "order")}
             />
             <TextField

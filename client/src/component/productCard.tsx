@@ -14,14 +14,14 @@ export const ProductCardComponent = (props: ProductCard) => {
         }
     }} />
     return (
-        <div data-testid="productCard" ref={selfDom} className='inline-block relative w-productCard'>
+        <div ref={selfDom} className='inline-block relative w-1/5'>
             <Link to={`/detail/${props.id}`} className="block mb-3" >
                 {imgDom}
             </Link>
             <div className="flex justify-center mb-1">
                 {
                     props.subproducts.map(sp => (
-                        <Link data-testid='productCard-colorBtn' className="w-4 h-4 mx-1 inline-block border border-gray" style={{ zIndex: 200 }} to={`/detail/${props.id}?${URL_QUERY_SUBPRODUCT_ID_FOR_DETAIL}=${sp.id}`} key={sp.id}>
+                        <Link className="w-4 h-4 mx-1 inline-block border border-gray" style={{ zIndex: 200 }} to={`/detail/${props.id}?${URL_QUERY_SUBPRODUCT_ID_FOR_DETAIL}=${sp.id}`} key={sp.id}>
                             <img className="w-full h-full" src={getColorImgUrlApi(sp.colorId)} alt={sp.colorName} />
                         </Link>
                     ))

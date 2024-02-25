@@ -40,7 +40,7 @@ export const MenuNavigation = (props: { navigationTree: NavigationTree[] }) => {
                                 </Link>
                                 {
                                     i === props.navigationTree.length - 1 ||
-                                    <span >
+                                    <span className=" text-slate-200">
                                         |
                                     </span>
                                 }

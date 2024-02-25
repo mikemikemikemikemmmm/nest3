@@ -7,7 +7,7 @@ export const AlertContainer = () => {
     const alertList = useSelector((state: RootState) => state.appSlice.alertList)
     return <div
         style={{
-            position: 'absolute',
+            position: 'fixed',
             right: 20,
             bottom: 20,
             zIndex:  ZIndex.Alert 
