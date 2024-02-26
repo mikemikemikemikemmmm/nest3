@@ -33,8 +33,8 @@ import { AuthMiddleware } from './guard/auth';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
+    // consumer
+    //   .apply(AuthMiddleware)
+    //   .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
   }
 }

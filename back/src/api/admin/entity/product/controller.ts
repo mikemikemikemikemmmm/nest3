@@ -295,8 +295,6 @@ export class _Controller {
         } finally {
             await queryRunner.release()
         }
-        console.log(2)
-
         if (errorStr) {
             throw new HttpException(errorStr, 500)
         }

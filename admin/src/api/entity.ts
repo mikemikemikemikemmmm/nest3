@@ -11,7 +11,8 @@ export const  enum EntityName {
     SubProduct = "SubProduct",
     Color = "Color",
     Gender = "Gender",
-    Size = "Size"
+    Size = "Size",
+    Stock = "Stock",
 }
 
 export const getAllApi = <Response>(entityName: EntityName, queryParams?: QueryParams) => getBaseApi<Response>(`entity/${entityName}`, queryParams)

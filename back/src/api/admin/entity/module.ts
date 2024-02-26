@@ -6,7 +6,17 @@ import { GenderApiModule } from "./gender/module";
 import { ProductApiModule } from "./product/module";
 import { SubProductApiModule } from "./subProduct/module";
 import { SizeApiModule } from "./size/module";
+import { StockApiModule } from "./stock/module";
 @Module({
-    imports:[ColorApiModule,NavApiModule,SeriesApiModule,GenderApiModule,ProductApiModule,SubProductApiModule,SizeApiModule]
+    imports:[
+        ColorApiModule,
+        NavApiModule,
+        SeriesApiModule,
+        GenderApiModule,
+        ProductApiModule,
+        SubProductApiModule,
+        SizeApiModule,
+        StockApiModule
+    ]
 })
 export class EntityApiModule{}
