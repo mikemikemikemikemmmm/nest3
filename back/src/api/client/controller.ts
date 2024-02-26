@@ -6,6 +6,10 @@ import { DataSource } from "typeorm";
 @Controller('client')
 export class ClientController {
     constructor(private ds: DataSource) { }
+    @Get("test")
+    async test(){
+        return "test"
+    }
     @Get("navigation")
     async getNavigation() {
         const result = await this.ds.createQueryBuilder()

@@ -1,27 +1,21 @@
 version: '3'
 
 services:
-  client:
-    build: ./client
-    ports:
-      - "80:80"
+  frontend:
+    build: 
+      dockerfile: ./frontend.dockerfile
     networks:
-      - custom_network
-
-  admin:
-    build: ./admin
-    ports:
-      - "81:81"
-    networks:
-      - custom_network
+      - frontend_network
+      - backend_network
 
   backend:
-    build: ./back
+    build: 
+      dockerfile: ./back/dockerfile
     ports:
-      - "3001:3001"
+      - "3001"
     networks:
-      - custom_network
+      - backend_network
 
 networks:
-  custom_network:
-    driver: bridge
+  frontend_network:
+  backend_network:

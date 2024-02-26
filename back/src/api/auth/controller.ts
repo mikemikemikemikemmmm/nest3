@@ -3,7 +3,7 @@ import { IsEmail, IsString } from "class-validator";
 import { User } from "src/entity/entity";
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from "typeorm";
-import * as bcrypt from "bcrypt";
+import * as bcryptjs from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { USER_ROLE } from "src/const";
 class LoginDto {
@@ -28,7 +28,7 @@ export class AuthController {
         if (!findUser) {
             throw new HttpException("無此用戶", 404)
         }
-        const isPass = await bcrypt.compare(dto.password, findUser.password)
+        const isPass = await bcryptjs.compare(dto.password, findUser.password)
         if (!isPass) {
             throw new HttpException("信箱或密碼錯誤'", 404)
         }
@@ -46,8 +46,8 @@ export class AuthController {
             throw new HttpException("此信箱已經註冊過", 404)
         }
         const saltRounds = this.configService.get("SALT_ROUNDS")
-        const salt = await bcrypt.genSalt(Number(saltRounds));
-        const hashedPassword = await bcrypt.hash(dto.password, salt)
+        const salt = await bcryptjs.genSalt(Number(saltRounds));
+        const hashedPassword = await bcryptjs.hash(dto.password, salt)
         await this.ds.manager.insert(User, { email: dto.email, password: hashedPassword,role:USER_ROLE.Guest })
     }
     // @Post("testToken")

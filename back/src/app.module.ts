@@ -21,7 +21,10 @@ import { AuthMiddleware } from './guard/auth';
     }),
     ServeStaticModule.forRoot({
       rootPath: getStaticFileFolderPath(),
-      serveRoot: '/static/'//TODO
+      serveRoot: '/static/',
+      serveStaticOptions:{
+        etag:true
+      }
     }),
     CacheModule.register(),
     EntityModule,

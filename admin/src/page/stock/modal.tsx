@@ -46,7 +46,7 @@ export const StockModal = (props: {
         if (!validStock) {
             dispatchError("存貨不能為負數")
             return
-        }
+        }//TODO
     }
     const handleChangeStock = (inputIndex: number, type: "plus" | "minus") => {
         const newInputData = [...inputData]

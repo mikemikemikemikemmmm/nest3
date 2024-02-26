@@ -124,7 +124,7 @@ export class _Controller {
         return result
     }
     @Get("tree")
-    async getTreeData() {//TODO
+    async getTreeData() {
         const allNav = await this.getAll()
         const result = []
         allNav.forEach((n: Navigation) => {

@@ -123,7 +123,7 @@ export class _Controller {
             sql.where("p.seriesId = :seriesId", { seriesId: +seriesId })
         }
         if (name) {
-            sql.where("p.name = :name", { name }) //TODO
+            sql.where("p.name = :name", { name }) 
         }
         return await sql.getRawMany()
     }
@@ -275,7 +275,7 @@ export class _Controller {
             await queryRunner.startTransaction();
             const { imageFileNameListStringifyJson } = await queryRunner.manager.findOneBy(Product, { id: +productId })
             const imageFileNameList: string[] = JSON.parse(imageFileNameListStringifyJson)
-            const newImageName = String(Date.now()) //TODO
+            const newImageName = String(Date.now()) 
             if (imageFileNameList.includes(newImageName)) {
                 throw new HttpException("已有相同名稱的圖片", 500)
             }

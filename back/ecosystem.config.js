@@ -3,11 +3,9 @@ module.exports = {
     {
       script: "./dist/main.js",
       autorestart: true,
-      watch:["src"],
+      ignore_watch:["node_modules","db"],
+      watch:["dist"],
       max_restarts: 10,
-      env_production: {
-        "NODE_ENV": "production"
-      }
     },
 
   ],

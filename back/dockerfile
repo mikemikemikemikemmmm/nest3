@@ -1,13 +1,11 @@
 FROM node:lts-alpine
-WORKDIR /back
-COPY package*.json ./
+WORKDIR /
+COPY ./back/package*.json .
 RUN npm install
-COPY . .
+COPY ./back/. .
+ENV NODE_ENV=production
 RUN npm run build
 RUN npm install pm2 -g
 EXPOSE 3001
-VOLUME /back/db
-ENV NODE_ENV=production
+VOLUME ./back/db ./db
 CMD ["npm", "run", "pm2"]
-
-

@@ -15,6 +15,7 @@ baseApi.interceptors.response.use((response) => {
 }, function (error) {  // when code is larger than 200
     if (error.response?.status === 401) {
         //TODO
+        // router.push('/login')
     }
     const errorMessage =
         error?.response?.data?.errorMessage || error?.message

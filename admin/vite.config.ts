@@ -13,6 +13,7 @@ export default ({ mode }) => {
     },
     server: {
       port: Number(process.env.VITE_PORT)
-    }
+    },
+    base: mode === "production" ? "/admin/" : "/"
   })
 }

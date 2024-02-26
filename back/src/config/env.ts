@@ -11,7 +11,8 @@ export const getEnvFilePath = () => {
     return join(process.cwd(), `.env.${getNowEnviroment()}`)
 }
 export const getDBUrl = () => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}.db`)
+    console.log(join(process.cwd(), "db", `${getNowEnviroment()}.db`),22222222222)
+    return join(process.cwd(), "db",`${getNowEnviroment()}.db`)
 }
 export const getStaticFileFolderPath = () => {
     console.log(process.cwd(), "db", `${getNowEnviroment()}`)
