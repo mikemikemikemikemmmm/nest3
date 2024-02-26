@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    networks:
+      - custom_network
+
+  admin:
+    build: ./admin
+    ports:
+      - "81:81"
+    networks:
+      - custom_network
+
+  backend:
+    build: ./back
+    ports:
+      - "3001:3001"
+    networks:
+      - custom_network
+
+networks:
+  custom_network:
+    driver: bridge

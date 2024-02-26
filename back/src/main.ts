@@ -10,9 +10,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const adminUrl = configService.get<string>("ADMIN_URL") 
   const clientUrl = configService.get<string>("CLIENT_URL")
-  app.enableCors({
-    origin:[adminUrl,clientUrl]
-  }); 
+  console.log(adminUrl,clientUrl,111111)
+  app.enableCors(); 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
