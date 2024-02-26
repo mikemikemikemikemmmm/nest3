@@ -1,4 +1,4 @@
-import { getBaseApi } from "../base"
+import { getBaseApi, postBaseApi, putBaseApi } from "../base"
 import { EntityName } from "../entity"
 export interface SubproductWithStock {
     id: number,
@@ -6,7 +6,7 @@ export interface SubproductWithStock {
     colorName: string,
     stocks: {
         id: number,
-        sizeId:number,
+        sizeId: number,
         sizeName: string,
         stock: number
     }[]
@@ -24,3 +24,9 @@ export const getProductWithStockApi = (productId?: number) => {
     }
     return getBaseApi<ProductWithStock[]>(`entity/${EntityName.Product}/withStock`)
 }
+ type StockUpdateDto = {
+    stockId: number,
+    stock: number
+}[]
+export const updateStockApi = (stockUpdateDto:StockUpdateDto) =>
+    putBaseApi(`entity/${EntityName.Stock}`, stockUpdateDto)

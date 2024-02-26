@@ -1,51 +1,48 @@
 
-import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, Param, ParseArrayPipe, Patch, Post, Put } from "@nestjs/common";
 import { PartialType } from "@nestjs/mapped-types";
-import { IsInt, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsInt, IsNotEmpty, IsString, ValidateNested } from "class-validator";
 import { DataSource } from "typeorm";
 import { BaseService } from "../baseService";
 import { getEnitiyApiPrefix } from "../utils";
 import { Size, Stock } from "src/entity/entity";
-class CreateDto {
+class StockUpdateDtoItem {
     @IsInt()
-    subproductId: number
-    @IsInt()
-    sizeId: number
-}
-class UpdateDto {
+    stockId: number
     @IsInt()
     stock: number
 }
-@Controller(getEnitiyApiPrefix(Size))
+@Controller(getEnitiyApiPrefix(Stock))
 export class _Controller {
     constructor(
         private ds: DataSource,
     ) { }
-    @Get()
-    async getAll() {
-        return await BaseService.getMany(this.ds, Size)
-    }
-    @Put(":id")
-    async updateById(
-        @Param("id") id: string,
-        @Body() dto: UpdateDto
+    @Put("")
+    async update(
+        @Body(new ParseArrayPipe({ items: StockUpdateDtoItem }))
+        updateDtoList: StockUpdateDtoItem[]
     ) {
-        return await BaseService.updateById(id, this.ds, Stock, dto)
-    }
-    @Post()
-    async insert(@Body() dto: CreateDto) {
-        const hasItem = await this.ds.manager.findOneBy(Stock, { sizeId: dto.sizeId, subproductId: dto.subproductId })
-        if (hasItem) {
-            throw new HttpException("已有相同副產品與尺寸", 404)
+        const queryRunner = this.ds.createQueryRunner()
+        let errorStr
+        try {
+            await queryRunner.startTransaction();
+            for (let i = 0; i < updateDtoList.length; i++) {
+                const dto = updateDtoList[i]
+                const findById = await queryRunner.manager.findOneBy(Stock, { id: dto.stockId })
+                if (!findById) {
+                    throw new HttpException("無此Id", 500)
+                }
+                await queryRunner.manager.update(Stock, { id: dto.stockId }, { stock: dto.stock })
+            }
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            errorStr = err
+            await queryRunner.rollbackTransaction()
+        } finally {
+            await queryRunner.release()
         }
-        return await BaseService.insertOne(this.ds, Stock, { ...dto, stock: 0 })
-    }
-    @Delete(":id")
-    async deleteOne(@Param("id") id: string) {
-        const hasItem = await this.ds.manager.findOneBy(Stock, { id: +id })
-        if (!hasItem) {
-            throw new HttpException("沒有此Id", 404)
+        if (errorStr) {
+            throw new HttpException(errorStr, 500)
         }
-        return await BaseService.deleteById(id, this.ds, Stock)
     }
 }

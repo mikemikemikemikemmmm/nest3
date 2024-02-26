@@ -22,7 +22,7 @@ export const AsideComponent = (props: { menuRoute: string }) => {
                 {
                     asideData
                         .filter(category => category.children.length > 0)
-                        .map(category => <ul key={category.id}>
+                        .map(category => <ul className='mb-6' key={category.id}>
                             <li>
                                 <h2 className='text-lg font-bold from-neutral-900'>
                                     <span className="inline-block">。</span>

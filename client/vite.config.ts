@@ -1,27 +1,14 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
-export default defineConfig(({ command, mode, ssrBuild }) => {
-  if (command === 'build') {
-    return {
-      base: '/nest2/client/',
-      assetsInclude: ['**/*.jpg'],
-      plugins: [react({
-        babel: {
-          plugins: [
-            ["react-remove-properties", { "properties": ["data-testid"] }]
-          ]
-        }
-      })],
-    }
-  } else {
-    return {
-      plugins: [react()],
-      assetsInclude: ['**/*.jpg'],
-      server:{
-        port:5174
-      }
-    }
-  }
-})
+export default ({ mode }) => {
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  return defineConfig({
+    assetsInclude: ['**/*.jpg'],
+    plugins: [react()],
+    server: {
+      port: Number(process.env.VITE_PORT)
+    },
+    base: mode === "production" ? "/client/" : "/"
+  })
+}

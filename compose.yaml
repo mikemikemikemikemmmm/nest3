@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  frontend:
+    build: 
+      dockerfile: ./frontend.dockerfile
+    networks:
+      - frontend_network
+      - backend_network
+
+  backend:
+    build: 
+      dockerfile: ./back/dockerfile
+    ports:
+      - "3001"
+    networks:
+      - backend_network
+
+networks:
+  frontend_network:
+  backend_network:

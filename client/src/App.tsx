@@ -1,11 +1,11 @@
 import './style/index.css'
-import { MenuNavigation } from './component/nav'
 import { Outlet } from 'react-router-dom'
 import { NavigationTree, getNavigationTreeApi } from './api/get'
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { setNavigationTree } from './store'
 import { Wrapper } from './component/wrapper'
+import { MenuNavigation } from './component/Nav'
 function App() {
     const [navigationTree, _setNavigationTree] = useState<NavigationTree[]>([])
     const dispatch = useDispatch()

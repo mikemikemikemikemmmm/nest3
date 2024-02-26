@@ -3,8 +3,9 @@ import { useRef, useState } from "react"
 import { dispatchError } from "../../utils/errorHandler"
 import { Box, Button, IconButton, TextField } from "@mui/material"
 import { FieldWrapper } from "../../component/fieldWrapper"
-import { ProductWithStock, SubproductWithStock } from "@/api/page/stock"
+import { ProductWithStock, SubproductWithStock, updateStockApi } from "@/api/page/stock"
 import { getColorImageUrlApi, getImgUrlBySubProductIdApi } from "@/api/staticFile"
+import { EntityName, updateOneByIdApi } from "@/api/entity"
 type InputData = {
     stockId: number,
     stock: number,
@@ -47,6 +48,17 @@ export const StockModal = (props: {
             dispatchError("存貨不能為負數")
             return
         }
+        const updateDto = inputData.map(stock => {
+            return {
+                stockId: stock.stockId,
+                stock: stock.stock
+            }
+        })
+        const update = await updateStockApi(updateDto)
+        if(update.isSuccess){
+            closeModal()
+            forcedRender()
+        }
     }
     const handleChangeStock = (inputIndex: number, type: "plus" | "minus") => {
         const newInputData = [...inputData]
@@ -62,14 +74,14 @@ export const StockModal = (props: {
     }
     return (
         <>
-            <div style={{display:"flex",alignItems:"start"}}>
+            <div style={{ display: "flex", alignItems: "start" }}>
                 <span style={{ width: "50%", display: "inline-block" }}>
-                    <img style={{ width: "100%"}} src={getImgUrlBySubProductIdApi(modalDataProp.targetSubproductId)} />
+                    <img style={{ width: "100%" }} src={getImgUrlBySubProductIdApi(modalDataProp.targetSubproductId)} />
                 </span>
                 <span style={{ width: "50%", display: "inline-block" }}>
                     <Box margin={1}>名稱：{modalDataProp.name}-{modalDataProp.genderName}</Box>
                     <Box margin={1} display={"flex"} alignItems={"center"}>
-                    顏色：{targetSubproduct.current.colorName} 
+                        顏色：{targetSubproduct.current.colorName}
                         <img
                             style={{ height: 18 }}
                             src={getColorImageUrlApi(targetSubproduct.current.colorId)}
@@ -80,10 +92,10 @@ export const StockModal = (props: {
                         inputData?.map((stockInput, index) => (
                             <Box margin={1} display={"flex"} key={stockInput.stockId}>
                                 <span>{stockInput.sizeName}存貨量</span>
-                                <span style={{display:"inline-block",height:"fit-content", whiteSpace: "nowrap", marginLeft: "auto" , border: "1px solid black"}}>
-                                    <Box sx={{":hover":{backgroundColor:"black",color:"white"},userSelect:"none", display:"inline-flex",alignItems:"center",justifyContent:"center",m:0,p:0,width:"16px",cursor:"pointer",border:0}}   onClick={() => handleChangeStock(index, "plus")}>+</Box>
-                                    <span style={{  borderLeft: "1px solid black", borderRight: "1px solid black", width: 32 ,display:"inline-flex" ,alignItems:"center",justifyContent:"center"}}>{stockInput.stock}</span>
-                                    <Box sx={{":hover":{backgroundColor:"black",color:"white"},userSelect:"none", display:"inline-flex",alignItems:"center",justifyContent:"center",m:0,p:0,width:"16px",cursor:"pointer",border:0}}   onClick={() => handleChangeStock(index, "minus")}>-</Box>
+                                <span style={{ display: "inline-block", height: "fit-content", whiteSpace: "nowrap", marginLeft: "auto", border: "1px solid black" }}>
+                                    <Box sx={{ ":hover": { backgroundColor: "black", color: "white" }, userSelect: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", m: 0, p: 0, width: "16px", cursor: "pointer", border: 0 }} onClick={() => handleChangeStock(index, "plus")}>+</Box>
+                                    <span style={{ borderLeft: "1px solid black", borderRight: "1px solid black", width: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{stockInput.stock}</span>
+                                    <Box sx={{ ":hover": { backgroundColor: "black", color: "white" }, userSelect: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", m: 0, p: 0, width: "16px", cursor: "pointer", border: 0 }} onClick={() => handleChangeStock(index, "minus")}>-</Box>
                                 </span>
                             </Box>
                         ))
