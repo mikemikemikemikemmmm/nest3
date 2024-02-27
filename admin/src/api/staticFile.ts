@@ -22,4 +22,4 @@ export const getImgUrlBySubProductIdApi =
         subProductId === FAKE_ID_FOR_CREATE ?
             undefined
             :
-            `${BASE_URL}/${STATIC_API_PREFIX}/subProducts/${subProductId}.jpg?updated_at=${updated_at}`
+            `${BASE_URL}/${STATIC_API_PREFIX}/subproducts/${subProductId}.jpg?updated_at=${updated_at}`

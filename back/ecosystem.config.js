@@ -6,6 +6,9 @@ module.exports = {
       ignore_watch:["node_modules","db"],
       watch:["dist"],
       max_restarts: 10,
+      env: {
+        NODE_ENV: "production",
+      },
     },
 
   ],

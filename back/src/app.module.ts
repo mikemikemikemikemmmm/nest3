@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { EntityModule } from './entity/module';
-import { getDBUrl, getEnvFilePath, getNowEnviroment, getStaticFileFolderPath, Enviroment } from './config/env';
+import { getDBUrl, getEnvFilePath, getNowEnviroment,geImageFolderPath, Enviroment } from './config/env';
 import { RootApiModule } from './api/module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthMiddleware } from './guard/auth';
@@ -14,16 +14,17 @@ import { AuthMiddleware } from './guard/auth';
       envFilePath: getEnvFilePath(), isGlobal: true
     }),
     TypeOrmModule.forRoot({
-      type: 'sqlite',
+      type: "sqlite",
+      driver:require("sqlite3"),
       database: getDBUrl(),
       synchronize: getNowEnviroment() === Enviroment.Development,
       autoLoadEntities: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: getStaticFileFolderPath(),
+      rootPath: geImageFolderPath(),
       serveRoot: '/static/',
-      serveStaticOptions:{
-        etag:true
+      serveStaticOptions: {
+        etag: true
       }
     }),
     CacheModule.register(),
@@ -33,8 +34,8 @@ import { AuthMiddleware } from './guard/auth';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // consumer
-    //   .apply(AuthMiddleware)
-    //   .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
+      consumer
+        .apply(AuthMiddleware)
+        .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
   }
 }

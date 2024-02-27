@@ -3,19 +3,17 @@ version: '3'
 services:
   frontend:
     build: 
-      dockerfile: ./frontend.dockerfile
-    networks:
-      - frontend_network
-      - backend_network
-
+      dockerfile: frontend.dockerfile
+    ports:
+      - "80:80"
+    # networks:
+    #   - app_network
   backend:
     build: 
-      dockerfile: ./back/dockerfile
+      dockerfile: backend.dockerfile
+    # networks:
+    #   - app_network
     ports:
-      - "3001"
-    networks:
-      - backend_network
-
-networks:
-  frontend_network:
-  backend_network:
+      - "3001:3001"
+# networks:
+#   app_network:

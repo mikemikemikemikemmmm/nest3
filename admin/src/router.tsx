@@ -6,6 +6,7 @@ import { NavigationPage } from "./page/navigation";
 import { ProductListPage } from "./page/productList";
 import { ProductDetailPage } from "./page/productdetail";
 import { StockPage } from "./page/stock";
+import { NGINX_FOLDER_NAME, isDevEnviroment } from "./const";
 export const childrenRoute: (RouteObject & { name: string, showOnDrawer?: boolean })[] = [
     {
         path: "/",
@@ -53,4 +54,6 @@ export const browserRouter = createBrowserRouter([
         element: <App />,
         children: childrenRoute,
     },
-]);
+],{
+    basename:`/${NGINX_FOLDER_NAME}/`
+});

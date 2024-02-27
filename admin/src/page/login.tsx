@@ -20,10 +20,10 @@ export const LoginPage = () => {
         }
     }
     const testToken = async () => {
-        // const test = await testTokenApi()
-        // if(test.isSuccess){
-        //     navigate("/color")
-        // }
+        const test = await testTokenApi()
+        if(test.isTokenValid){
+            navigate("/color")
+        }
     }
     useEffect(() => {
         testToken()

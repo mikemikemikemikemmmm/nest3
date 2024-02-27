@@ -29,3 +29,7 @@ export const FORMDATA_KEY_FOR_DTO = 'stringifyJson'
 export const FAKE_ID_FOR_CREATE = -99
 export const CREATE_PRODUCT_BY_SERIES_ID_QUERY_STR = "createProductBySeriesId"
 export const TOKEN_KEY_IN_LOCALSTORAGE = "token"
+export const isDevEnviroment = import.meta.env.DEV
+
+
+export const NGINX_FOLDER_NAME = import.meta.env.VITE_NGINX_FOLDER_NAME

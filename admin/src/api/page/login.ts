@@ -1,5 +1,5 @@
 import { get } from "http"
-import { baseApi } from "../base"
+import { baseApi, getBaseApi } from "../base"
 import { dispatchError } from "@/utils/errorHandler"
 import { TOKEN_KEY_IN_LOCALSTORAGE } from "@/const"
 import { getToken, setToken } from "@/utils/token"
@@ -17,10 +17,13 @@ export const loginApi = async (data: { password: string, email: string }) => {
 
 export const testTokenApi = async () => {
     const token = getToken()
+    if (!token) {
+        return { isTokenValid: false }
+    }
     try {
-        const test = await baseApi.post('auth/testToken', {token})
-        return { isSuccess: true }
+        const test = await baseApi.get<{ data: { isTokenValid: boolean } }>('auth/testToken')
+        return { isTokenValid: test.data.data.isTokenValid }
     } catch (error) {
-        return { isSuccess: false }
+        return { isTokenValid: false }
     }
 }

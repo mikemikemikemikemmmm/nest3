@@ -9,6 +9,6 @@ export default ({ mode }) => {
     server: {
       port: Number(process.env.VITE_PORT)
     },
-    base: mode === "production" ? "/client/" : "/"
+    base: mode === "production" ? `/${process.env.VITE_NGINX_FOLDER_NAME}/` : "/"
   })
 }

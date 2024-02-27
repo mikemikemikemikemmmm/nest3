@@ -8,11 +8,12 @@ import { IndexPage } from './page'
 import App from './App'
 import { ErrorPage } from './page/error'
 import { WrapperWithAside } from './component/wrapperWithAside'
+import { isDevEnviroment, NGINX_FOLDER_NAME } from './config'
 
 export const childrenRoute: RouteObject[] = [
     {
         element: <IndexPage />,
-        path: ""
+        path: "/"
     },
     {
         element: <WrapperWithAside />,
@@ -65,10 +66,12 @@ export const childrenRoute: RouteObject[] = [
 ]
 export const browserRouter = createBrowserRouter([
     {
-        path: "/",
+        path:"/",
         element: <App />,
         children: childrenRoute,
         errorElement: <ErrorPage />,
     },
-]);
+],{
+    basename:`/${NGINX_FOLDER_NAME}/`
+});
 

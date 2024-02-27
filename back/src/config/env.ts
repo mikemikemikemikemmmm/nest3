@@ -8,29 +8,30 @@ export const getNowEnviroment = (): Enviroment => {
     return process.env.NODE_ENV as Enviroment
 }
 export const getEnvFilePath = () => {
-    return join(process.cwd(), `.env.${getNowEnviroment()}`)
+    return join(__dirname,"..","..", `.env.${getNowEnviroment()}`)
+}
+const getDBFolderPath = ()=>{
+    return join(__dirname,"..","..","db",getNowEnviroment())
+}
+export const geImageFolderPath = ()=>{
+    return join(getDBFolderPath(),"images")
 }
 export const getDBUrl = () => {
-    console.log(join(process.cwd(), "db", `${getNowEnviroment()}.db`),22222222222)
-    return join(process.cwd(), "db",`${getNowEnviroment()}.db`)
-}
-export const getStaticFileFolderPath = () => {
-    console.log(process.cwd(), "db", `${getNowEnviroment()}`)
-    return join(process.cwd(), "db", `${getNowEnviroment()}`)
+    return join(getDBFolderPath(),"db.db")
 }
 export const getColorImageFilePath = (colorId: string) => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}`, "colors", `${colorId}.jpg`)
+    return join(geImageFolderPath(), "colors", `${colorId}.jpg`)
 }
 export const getSubproductImageFilePath = (spId: string) => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}`, "subproducts", `${spId}.jpg`)
+    return join(geImageFolderPath(), "subproducts", `${spId}.jpg`)
 }
 export const getMenuBannerImageFilePath = (menuId: string) => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}`, "menu", `${menuId}.jpg`)
+    return join(geImageFolderPath(), "menu", `${menuId}.jpg`)
 }
 export const getProductImageFilePath = (productId: string, imageName: string) => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}`, "products", productId, `${imageName}.jpg`)
+    return join(geImageFolderPath(), "products", productId, `${imageName}.jpg`)
 }
 export const getProductImageFolderPath = (productId: string) => {
-    return join(process.cwd(), "db", `${getNowEnviroment()}`, "products", productId)
+    return join(geImageFolderPath(), "products", productId)
 }
 
