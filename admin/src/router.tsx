@@ -54,6 +54,6 @@ export const browserRouter = createBrowserRouter([
         element: <App />,
         children: childrenRoute,
     },
-],{
-    basename:`/${NGINX_FOLDER_NAME}/`
+], {
+    basename: isDevEnviroment ? "" : `/${NGINX_FOLDER_NAME}/`
 });

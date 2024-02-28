@@ -4,6 +4,7 @@ export const enum Enviroment {
     Development = "development",
     Production = "production"
 }
+export const isDevEnviroment = process.env.NODE_ENV === Enviroment.Development
 export const getNowEnviroment = (): Enviroment => {
     return process.env.NODE_ENV as Enviroment
 }

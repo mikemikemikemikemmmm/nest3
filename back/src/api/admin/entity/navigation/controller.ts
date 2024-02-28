@@ -278,10 +278,10 @@ export class _Controller {
             throw new HttpException("資料驗證錯誤", HttpStatus.UNPROCESSABLE_ENTITY)
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         await queryRunner.startTransaction();
         let errorStr
         try {
-            console.log(111)
             await queryRunner.manager.update(Navigation,
                 { menuId: +menuId },
                 {
@@ -289,12 +289,12 @@ export class _Controller {
                     menuOrder: updateDto.order,
                     menuRoute: updateDto.route,
                 })
-            await queryRunner.commitTransaction()
             const hasFile = imageFile && imageFile.buffer.length !== 0
             if (hasFile) {
                 const imageSavePath = getMenuBannerImageFilePath(menuId)
                 await writeFile(imageSavePath, imageFile.buffer)
             }
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()
@@ -457,13 +457,15 @@ export class _Controller {
         }
         //below for menu
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             await queryRunner.manager.delete(Navigation, { [targetIdKey]: numId })
-            await queryRunner.commitTransaction()
+
             const imageFilePath = getMenuBannerImageFilePath(selfId)
             await unlink(imageFilePath)
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()
@@ -518,14 +520,15 @@ export class _Controller {
             menuId: maxMenuId + 1
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             await queryRunner.manager.insert(Navigation, insertData)
-            await queryRunner.commitTransaction()
             const newMenuId = insertData.menuId
             const imageSavePath = getMenuBannerImageFilePath(String(newMenuId))
             await writeFile(imageSavePath, imageFile.buffer)
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()

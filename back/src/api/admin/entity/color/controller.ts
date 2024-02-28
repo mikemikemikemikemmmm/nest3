@@ -67,20 +67,21 @@ export class _Controller {
             throw new HttpException("資料驗證錯誤", HttpStatus.NOT_FOUND)
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         const hasSameName = await queryRunner.manager.findOneBy(Color, { name: updateDto.name, id: Not(+id) })
         if (hasSameName) {
             throw new HttpException("已有相同名稱", HttpStatus.NOT_FOUND)
         }
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             await queryRunner.manager.update(Color, { id: +id }, updateDto)
-            await queryRunner.commitTransaction()
             const hasFile = imageFile && imageFile.buffer.length !== 0
             if (hasFile) {
                 const imageSavePath = getColorImageFilePath(id)
                 await writeFile(imageSavePath, imageFile.buffer)
             }
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()
@@ -118,18 +119,19 @@ export class _Controller {
             throw new HttpException("資料驗證錯誤", HttpStatus.NOT_FOUND)
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         const hasSameName = await queryRunner.manager.findOneBy(Color, { name: createDto.name })
         if (hasSameName) {
             throw new HttpException("已有相同名稱", HttpStatus.NOT_FOUND)
         }
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             const executeCreate = await queryRunner.manager.insert(Color, createDto)
-            await queryRunner.commitTransaction()
             const newColorId = executeCreate.raw
             const imageSavePath = getColorImageFilePath(newColorId)
             await writeFile(imageSavePath, imageFile.buffer)
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()
@@ -147,17 +149,18 @@ export class _Controller {
             throw new HttpException("資料不存在", HttpStatus.CONFLICT)
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         const hasChildren = await queryRunner.manager.findBy(SubProduct, { colorId: +id })
         if (hasChildren.length > 0) {
             throw new HttpException("有產品使用此顏色", HttpStatus.CONFLICT)
         }
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             await queryRunner.manager.delete(Color, { id: +id })
-            await queryRunner.commitTransaction()
             const imageFilePath = getColorImageFilePath(id)
             await unlink(imageFilePath)
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()

@@ -260,7 +260,6 @@ export class _Controller {
         @Param("productId") productId: string
 
     ) {
-        const queryRunner = this.ds.createQueryRunner()
         const dirPath = getProductImageFolderPath(productId)
         try {
             const dirStat = await stat(dirPath);
@@ -271,8 +270,10 @@ export class _Controller {
             await mkdir(dirPath);
         }
         let errorStr
+        const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             const { imageFileNameListStringifyJson } = await queryRunner.manager.findOneBy(Product, { id: +productId })
             const imageFileNameList: string[] = JSON.parse(imageFileNameListStringifyJson)
             const newImageName = String(Date.now()) 
@@ -285,9 +286,9 @@ export class _Controller {
                 { id: +productId },
                 { imageFileNameListStringifyJson: stringify }
             )
-            await queryRunner.commitTransaction()
             const imageSavePath = getProductImageFilePath(productId, newImageName)
             await writeFile(imageSavePath, imageFile.buffer)
+            await queryRunner.commitTransaction()
 
         } catch (err) {
             errorStr = err
@@ -341,6 +342,7 @@ export class _Controller {
         @Param("imageName") imageName: string
     ) {
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         const { imageFileNameListStringifyJson } = await queryRunner.manager.findOneBy(Product, { id: +productId })
         const imageList: string[] = JSON.parse(imageFileNameListStringifyJson)
         const deleteIndex = imageList.findIndex(_imageName => _imageName === imageName)
@@ -348,8 +350,8 @@ export class _Controller {
             throw new HttpException("無此圖片", 500)
         }
         let errorStr
+        await queryRunner.startTransaction();
         try {
-            await queryRunner.startTransaction();
             imageList.splice(deleteIndex, 1)
             const newStringify = JSON.stringify(imageList)
             await queryRunner.manager.update(Product,
@@ -357,9 +359,9 @@ export class _Controller {
                 {
                     imageFileNameListStringifyJson: newStringify
                 })
-            await queryRunner.commitTransaction();
             const imagePath = getProductImageFilePath(productId, imageName)
             await unlink(imagePath)
+            await queryRunner.commitTransaction()
         } catch (err) {
             errorStr = err
             await queryRunner.rollbackTransaction()

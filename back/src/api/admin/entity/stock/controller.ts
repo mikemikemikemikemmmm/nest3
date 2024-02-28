@@ -23,9 +23,10 @@ export class _Controller {
         updateDtoList: StockUpdateDtoItem[]
     ) {
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction();
         let errorStr
         try {
-            await queryRunner.startTransaction();
             for (let i = 0; i < updateDtoList.length; i++) {
                 const dto = updateDtoList[i]
                 const findById = await queryRunner.manager.findOneBy(Stock, { id: dto.stockId })

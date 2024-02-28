@@ -72,6 +72,6 @@ export const browserRouter = createBrowserRouter([
         errorElement: <ErrorPage />,
     },
 ],{
-    basename:`/${NGINX_FOLDER_NAME}/`
+    basename:isDevEnviroment?"":`/${NGINX_FOLDER_NAME}/`
 });
 

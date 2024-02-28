@@ -1,9 +1,9 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { EntityModule } from './entity/module';
-import { getDBUrl, getEnvFilePath, getNowEnviroment,geImageFolderPath, Enviroment } from './config/env';
+import { getDBUrl, getEnvFilePath, getNowEnviroment, geImageFolderPath, Enviroment, isDevEnviroment } from './config/env';
 import { RootApiModule } from './api/module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthMiddleware } from './guard/auth';
@@ -15,17 +15,29 @@ import { AuthMiddleware } from './guard/auth';
     }),
     TypeOrmModule.forRoot({
       type: "sqlite",
-      driver:require("sqlite3"),
+      driver: require("sqlite3"),
       database: getDBUrl(),
-      synchronize: getNowEnviroment() === Enviroment.Development,
+      synchronize: isDevEnviroment,
       autoLoadEntities: true,
     }),
-    ServeStaticModule.forRoot({
-      rootPath: geImageFolderPath(),
-      serveRoot: '/static/',
-      serveStaticOptions: {
-        etag: true
-      }
+    ServeStaticModule.forRootAsync({
+      useFactory: (config: ConfigService) => {
+        const getServeRoot = () => {
+          if (!isDevEnviroment) {
+            const prefix = config.get<string>("PRODUCTION_PREFIX")
+            return `/${prefix}/static/`
+          }
+          return "/static/"
+        }
+        return [{
+          rootPath: geImageFolderPath(),
+          serveStaticOptions: {
+            etag: true
+          },
+          serveRoot:getServeRoot()
+        }]
+      },
+      inject: [ConfigService]
     }),
     CacheModule.register(),
     EntityModule,
@@ -34,8 +46,8 @@ import { AuthMiddleware } from './guard/auth';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-      consumer
-        .apply(AuthMiddleware)
-        .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes({ path: 'admin*', method: RequestMethod.ALL });
   }
 }

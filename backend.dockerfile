@@ -8,5 +8,5 @@ ENV NODE_ENV=production
 RUN npm run build
 RUN npm install pm2 -g
 EXPOSE 3001
-VOLUME ./back/db ./db
+VOLUME ./back/db/production ./db/production
 CMD ["npm", "run", "pm2"]

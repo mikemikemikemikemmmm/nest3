@@ -86,6 +86,7 @@ export class _Controller {
             throw new HttpException("資料驗證錯誤", HttpStatus.NOT_FOUND)
         }
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         await queryRunner.startTransaction()
         let error
         try {
@@ -126,11 +127,11 @@ export class _Controller {
                     subproduct: { id: +id }, size: { id: sizeId }
                 })
             })
-            await queryRunner.commitTransaction()
             if (imageFile && imageFile.buffer.length > 0) {
                 const imageSavePath = getSubproductImageFilePath(id)
                 await writeFile(imageSavePath, imageFile.buffer)
             }
+            await queryRunner.commitTransaction()
         } catch (err) {
             error = err
             await queryRunner.rollbackTransaction()
@@ -169,6 +170,8 @@ export class _Controller {
             throw new HttpException("資料驗證錯誤", 404)
         }
         const queryRunner = this.ds.createQueryRunner()
+        
+        await queryRunner.connect()
         await queryRunner.startTransaction()
         let error
         try {
@@ -184,8 +187,8 @@ export class _Controller {
                     })
             })
             const imageSavePath = getSubproductImageFilePath(newSubproductId)
-            await queryRunner.commitTransaction()
             await writeFile(imageSavePath, imageFile.buffer)
+            await queryRunner.commitTransaction()
         } catch (err) {
             error = err
             await queryRunner.rollbackTransaction()
@@ -205,12 +208,13 @@ export class _Controller {
         }
         const imageFilePath = getSubproductImageFilePath(id)
         const queryRunner = this.ds.createQueryRunner()
+        await queryRunner.connect()
         await queryRunner.startTransaction()
         try {
             await queryRunner.manager.delete(Stock, { subproduct: { id: +id } })
             await queryRunner.manager.delete(SubProduct, { id: +id })
-            await queryRunner.commitTransaction()
             await unlink(imageFilePath)
+            await queryRunner.commitTransaction()
         } catch (err) {
             await queryRunner.rollbackTransaction()
             throw new HttpException("刪除失敗", HttpStatus.BAD_REQUEST)

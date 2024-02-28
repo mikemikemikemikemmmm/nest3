@@ -4,18 +4,22 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionFilter } from './filter/exceptionFilter';
 import { ResponseInterceptor } from './Interceptor/responseInterceptor';
-import { Enviroment, getNowEnviroment } from './config/env';
-
+import { Enviroment, getNowEnviroment, isDevEnviroment } from './config/env';
+import helmet from 'helmet';
+import { helmetConfig } from './config/helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.setGlobalPrefix('api');
   const configService = app.get(ConfigService);
-  if (getNowEnviroment() === Enviroment.Development) {
+  app.use(helmet(helmetConfig));
+  if (isDevEnviroment) {
     app.enableCors();
   } else {
+    const frontendOrigin = configService.get<string>("FRONTEND_ORIGIN")
     app.enableCors({
-      origin: "http://localhost"
+      origin: frontendOrigin
     });
+    const productionPrefix = configService.get<string>("PRODUCTION_PREFIX")
+    app.setGlobalPrefix(productionPrefix)
   }
   app.useGlobalPipes(
     new ValidationPipe({

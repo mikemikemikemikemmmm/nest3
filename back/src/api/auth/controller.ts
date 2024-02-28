@@ -35,7 +35,7 @@ export class AuthController {
         }
         const jwtSecret = this.configService.get("JWT_SECRET")
         const accessToken = jwt.sign(
-            { email: findUser.email, role: findUser.role },
+            { email: findUser.email ,role:findUser.role},
             jwtSecret,
             { expiresIn: '1h' });
         return accessToken
