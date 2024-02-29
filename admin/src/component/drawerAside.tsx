@@ -14,13 +14,14 @@ export default function DrawerAside() {
     const navigate = useNavigate()
     const [isShow, setIsShow] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
+    const token = getToken()
     useEffect(() => {
-        if(!getToken()){
+        if(!token){
             setIsLogin(false)
         }else{
             setIsLogin(true)
         }
-    })
+    },[token])
     if(!isLogin){
         return null
     }

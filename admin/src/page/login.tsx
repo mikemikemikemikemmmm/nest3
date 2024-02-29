@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { dispatchError, dispatchSuccess } from "../utils/errorHandler"
-import { getToken, setToken } from "../utils/token"
+import { deleteToken, getToken, setToken } from "../utils/token"
 import { loginApi, testTokenApi } from "@/api/page/login"
+import { ElevatorSharp } from "@mui/icons-material"
 
 export const LoginPage = () => {
     const navigate = useNavigate()
@@ -23,6 +24,8 @@ export const LoginPage = () => {
         const test = await testTokenApi()
         if(test.isTokenValid){
             navigate("/color")
+        }else{
+            deleteToken()
         }
     }
     useEffect(() => {
