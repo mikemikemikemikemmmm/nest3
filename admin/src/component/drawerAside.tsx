@@ -10,18 +10,23 @@ import { IconButton } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { childrenRoute } from '../router';
 import { deleteToken, getToken, setToken } from '@/utils/token';
+import { testTokenApi } from '@/api/page/login';
 export default function DrawerAside() {
     const navigate = useNavigate()
     const [isShow, setIsShow] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
-    const token = getToken()
-    useEffect(() => {
-        if(!token){
+    const testToken = async()=>{
+        const test= await testTokenApi()
+        if(!test.isTokenValid){
+            deleteToken()
             setIsLogin(false)
-        }else{
-            setIsLogin(true)
+            return
         }
-    },[token])
+        setIsLogin(true)
+    }
+    useEffect(() => {
+        testToken()
+    })
     if(!isLogin){
         return null
     }
